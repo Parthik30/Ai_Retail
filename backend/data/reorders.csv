@@ -1,0 +1,3 @@
+timestamp,product_name,reorder_qty,arrival_month,placed_by,note,status
+2026-01-01T10:03:08.087195,Test Product,100,2,tester,unit test,PLACED
+2026-01-01T10:04:14.674811,Laptop Dell i5,264,2,qa_verification,placed by automated UI verification,PLACED

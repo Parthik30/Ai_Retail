@@ -6,11 +6,9 @@ __pycache__/
 
 # Virtual environments
 venv/
-.env/
 .venv/
 env/
 venv-*/
-*.env
 
 # VS Code
 .vscode/
@@ -43,9 +41,7 @@ htmlcov/
 # Alembic
 alembic/versions/*.pyc
 
-# Large data files
-data/
-*.csv
+# Large data files (app data CSVs are kept - they are needed for deployment)
 *.xlsx
 *.parquet
 

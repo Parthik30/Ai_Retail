@@ -1,17 +1,14 @@
-flask
-flask-cors
-streamlit
-pandas
-numpy
-matplotlib
-plotly
-scikit-learn
-statsmodels
-seaborn
-watchdog
+streamlit>=1.32.0
+pandas>=2.0.0
+numpy>=1.26.0
+matplotlib>=3.8.0
+plotly>=5.18.0
+scikit-learn>=1.4.0
+statsmodels>=0.14.0
+seaborn>=0.13.0
 
 # DB & migrations
-SQLAlchemy
-psycopg2-binary
-alembic
-python-dotenv
+SQLAlchemy>=2.0.0
+psycopg2-binary>=2.9.9
+alembic>=1.13.0
+python-dotenv>=1.0.0
