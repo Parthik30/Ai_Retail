@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Inventory, Pricing & Discount Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<header>
+  <h2>🧠 Predictive Retail Intelligence Using AI</h2>
+  <button onclick="toggleTheme()">🌙 Toggle Theme</button>
+</header>
+
+<div class="container">
+
+  <!-- PRODUCT SELECT -->
+  <div class="section">
+    <label>Select Product</label>
+    <select id="productSelect"></select>
+    <button onclick="updateDashboard()">Analyze</button>
+    <button onclick="downloadReport()">⬇ Export Report</button>
+  </div>
+
+  <!-- KPI SUMMARY -->
+  <div class="cards">
+    <div class="card"><h3>Sales</h3><p id="sales">0</p></div>
+    <div class="card"><h3>Stock</h3><p id="stock">0</p></div>
+    <div class="card"><h3>Base Price</h3><p id="price">₹0</p></div>
+    <div class="card"><h3>Discount</h3><p id="discount">0%</p></div>
+    <div class="card highlight"><h3>Final Price</h3><p id="finalPrice">₹0</p></div>
+    <div class="card"><h3>Profit</h3><p id="profit">₹0</p></div>
+  </div>
+
+  <!-- DISCOUNT CONTROL -->
+  <div class="section">
+    <label>Apply Discount (%)</label>
+    <input type="range" min="0" max="40" value="0" id="discountSlider" oninput="applyManualDiscount(this.value)">
+    <span id="manualDiscount">0%</span>
+    <span id="aiBadge"></span>
+  </div>
+
+  <!-- PRICING STRATEGY -->
+  <div class="section">
+    <label><b>Strategy</b></label>
+    <div>
+      <label><input type="radio" name="pricingStrategy" value="target_margin" checked onchange="updateStrategyInfo()"> Target Margin %</label>
+    </div>
+    <div>
+      <label><input type="radio" name="pricingStrategy" value="markup" onchange="updateStrategyInfo()"> Markup %</label>
+    </div>
+    <div>
+      <label><input type="radio" name="pricingStrategy" value="increase" onchange="updateStrategyInfo()"> Increase by %</label>
+    </div>
+
+    <div id="strategyInfo" class="note" style="margin-top:8px;color:#333;">
+      <!-- Dynamic explanation will be injected here -->
+    </div>
+  </div>
+
+  <!-- INVENTORY STATUS -->
+  <div class="status" id="statusBox">
+    <h3>📦 Inventory Status</h3>
+    <p>Status: <b id="statusText">--</b></p>
+    <p>Suggested Reorder Qty: <b id="reorderQty">0</b></p>
+    <p>Inventory Health: <b id="healthMeter">--</b></p>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts">
+    <canvas id="salesChart"></canvas>
+    <canvas id="priceChart"></canvas>
+  </div>
+
+</div>
+
+<footer>
+  © MSc IT Final Year Project
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>

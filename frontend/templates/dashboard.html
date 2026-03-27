@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>IntelliStock Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+
+<body>
+
+    <div class="layout">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <h2>📦 IntelliStock</h2>
+            <a class="active">Dashboard</a>
+            <a>Inventory</a>
+            <a>Pricing</a>
+            <a>Alerts</a>
+            <a>Reports</a>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main>
+            <!-- PRODUCT SELECTOR -->
+            <div class="card" style="margin-top:20px;">
+                <label><b>Select Product</b></label>
+                <select id="productSelect" onchange="loadProductData()">
+                    <option value="">-- Select Product --</option>
+                </select>
+            </div>
+
+
+            <!-- TOP KPI CARDS -->
+            <div class="kpi-grid">
+                <div class="kpi">Total Sales<br><b id="sales">₹0</b></div>
+                <div class="kpi">Units Sold<br><b id="units">0</b></div>
+                <div class="kpi">Avg Price<br><b id="avgPrice">₹0</b></div>
+                <div class="kpi">Inventory Turnover<br><b id="turnover">0</b></div>
+            </div>
+
+            <!-- STOCK + CHARTS -->
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Stock Info</h3>
+                    <canvas id="stockChart"></canvas>
+                </div>
+
+                <div class="card">
+                    <h3>Top Selling Products</h3>
+                    <ul id="topProducts"></ul>
+                </div>
+            </div>
+
+        </main>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+
+</html>

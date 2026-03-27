@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login - IntelliStock</title>
+
+<style>
+body{
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg,#8E2DE2,#4A00E0);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  color:white;
+}
+
+.login-card{
+  width:380px;
+  padding:40px;
+  border-radius:18px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(15px);
+  box-shadow:0 20px 40px rgba(0,0,0,0.3);
+}
+
+h2{
+  margin-bottom:8px;
+  font-size:28px;
+}
+
+.subtitle{
+  font-size:14px;
+  opacity:0.8;
+  margin-bottom:30px;
+}
+
+label{
+  font-size:14px;
+  font-weight:600;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin:8px 0 16px 0;
+  border-radius:8px;
+  border:none;
+  background:rgba(255,255,255,0.2);
+  color:white;
+}
+
+input::placeholder{
+  color:#ddd;
+}
+
+.login-btn{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+  background: linear-gradient(90deg,#ffffff,#e0e0ff);
+  color:#4A00E0;
+  transition:0.3s;
+}
+
+.login-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(255,255,255,0.4);
+}
+
+.error{
+  color:#ffb3b3;
+  margin-bottom:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-card">
+  <h2>IntelliStock</h2>
+  <div class="subtitle">Sign in to continue</div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, msg in messages %}
+        <div class="error">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form action="{{ url_for('login') }}" method="post">
+    <label>Username or Email</label>
+    <input name="username" placeholder="Enter username or email" required>
+
+    <label>Password</label>
+    <input name="password" type="password" placeholder="Enter password" required>
+
+    <button class="login-btn" type="submit">LOGIN</button>
+  </form>
+</div>
+
+</body>
+</html>

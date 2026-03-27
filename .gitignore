@@ -1,0 +1,58 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.env/
+.venv/
+env/
+venv-*/
+*.env
+
+# VS Code
+.vscode/
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite3
+
+# Environment variables
+.env
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Pytest
+.pytest_cache/
+
+# Coverage
+htmlcov/
+.coverage
+
+# Alembic
+alembic/versions/*.pyc
+
+# Large data files
+data/
+*.csv
+*.xlsx
+*.parquet
+
+# Build / dist
+build/
+dist/
+*.egg-info/
+
+# Docker (optional)
+docker-compose.override.yml

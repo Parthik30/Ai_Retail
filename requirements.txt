@@ -1,0 +1,17 @@
+flask
+flask-cors
+streamlit
+pandas
+numpy
+matplotlib
+plotly
+scikit-learn
+statsmodels
+seaborn
+watchdog
+
+# DB & migrations
+SQLAlchemy
+psycopg2-binary
+alembic
+python-dotenv
