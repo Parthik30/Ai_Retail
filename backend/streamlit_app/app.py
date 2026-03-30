@@ -96,7 +96,15 @@ def safe_int(val, default=0):
 # ----------------------------------
 from backend.db import SessionLocal, init_db
 from backend.models import User, Registration, OTP
-from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.exc import ProgrammingError, OperationalError
+
+@st.cache_resource
+def initialize_database():
+    init_db()
+    return True
+
+# Ensure tables and initial seeding are done on first run
+initialize_database()
 
 
 def authenticate(username: str, password: str):
@@ -115,7 +123,7 @@ def authenticate(username: str, password: str):
                 .filter((User.username == username) | (User.email == username))
                 .first()
             )
-        except ProgrammingError:
+        except (ProgrammingError, OperationalError):
             session.rollback()
             init_db()
             return False, None
@@ -330,7 +338,7 @@ if not st.session_state.logged_in:
                             st.session_state.logged_in = True
                             st.session_state.username = user.username
                             st.rerun()
-                    except ProgrammingError:
+                    except (ProgrammingError, OperationalError):
                         session.rollback()
                         init_db()
                         uname_err.markdown("<p style='color:#ef4444;font-size:13px;margin:4px 0 0 20px;'>Database uninitialized. Please try again.</p>", unsafe_allow_html=True)
