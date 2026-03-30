@@ -334,10 +334,14 @@ if not st.session_state.logged_in:
                         user = session.query(User).filter((User.username == uname_clean) | (User.email == uname_clean)).first()
                         if not user:
                             uname_err.markdown("<p style='color:#ef4444;font-size:13px;margin:4px 0 0 20px;'>User not registered</p>", unsafe_allow_html=True)
-                            st.error("❌ Invalid credentials. Please try again.")
+                            from backend.db import DATABASE_URL
+                            dt = "PostgreSQL 🐘" if "postgres" in DATABASE_URL else "Local SQLite 📁"
+                            st.error(f"❌ Invalid credentials. Please try again. (Currently connected to {dt})")
                         elif user.password_hash.strip() != pwd_clean:
                             pwd_err.markdown("<p style='color:#ef4444;font-size:13px;margin:4px 0 0 20px;'>Password is incorrect</p>", unsafe_allow_html=True)
-                            st.error("❌ Invalid credentials. Please try again.")
+                            from backend.db import DATABASE_URL
+                            dt = "PostgreSQL 🐘" if "postgres" in DATABASE_URL else "Local SQLite 📁"
+                            st.error(f"❌ Invalid credentials. Please try again. (Currently connected to {dt})")
                         else:
                             st.session_state.logged_in = True
                             st.session_state.username = user.username
