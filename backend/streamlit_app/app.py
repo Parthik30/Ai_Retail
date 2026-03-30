@@ -116,11 +116,13 @@ def authenticate(username: str, password: str):
     calling Streamlit logic can rerun after the alteration.
     """
     session = SessionLocal()
+    username_clean = username.strip() if username else ""
+    password_clean = password.strip() if password else ""
     try:
         try:
             user = (
                 session.query(User)
-                .filter((User.username == username) | (User.email == username))
+                .filter((User.username == username_clean) | (User.email == username_clean))
                 .first()
             )
         except (ProgrammingError, OperationalError):
@@ -129,7 +131,7 @@ def authenticate(username: str, password: str):
             return False, None
     finally:
         session.close()
-    if user and user.password_hash == password:
+    if user and user.password_hash.strip() == password_clean:
         return True, user
     return False, None
 
@@ -327,11 +329,13 @@ if not st.session_state.logged_in:
                     from sqlalchemy.exc import ProgrammingError
                     session = SessionLocal()
                     try:
-                        user = session.query(User).filter((User.username == uname) | (User.email == uname)).first()
+                        uname_clean = uname.strip()
+                        pwd_clean = pwd.strip()
+                        user = session.query(User).filter((User.username == uname_clean) | (User.email == uname_clean)).first()
                         if not user:
                             uname_err.markdown("<p style='color:#ef4444;font-size:13px;margin:4px 0 0 20px;'>User not registered</p>", unsafe_allow_html=True)
                             st.error("❌ Invalid credentials. Please try again.")
-                        elif user.password_hash != pwd:
+                        elif user.password_hash.strip() != pwd_clean:
                             pwd_err.markdown("<p style='color:#ef4444;font-size:13px;margin:4px 0 0 20px;'>Password is incorrect</p>", unsafe_allow_html=True)
                             st.error("❌ Invalid credentials. Please try again.")
                         else:
