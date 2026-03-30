@@ -3,8 +3,8 @@ title: IntelliStock AI Retail Intelligence
 emoji: 📦
 colorFrom: purple
 colorTo: blue
-sdk: docker
-app_port: 7860
+sdk: streamlit
+app_file: backend/streamlit_app/app.py
 pinned: false
 license: mit
 short_description: Predictive Retail Intelligence powered by AI
