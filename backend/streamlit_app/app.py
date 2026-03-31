@@ -1142,9 +1142,15 @@ if st.sidebar.button(f"🌙 Toggle {'Light' if st.session_state.theme == 'dark' 
     st.session_state.theme = "light" if st.session_state.theme == "dark" else "dark"
     st.rerun()
 
-st.sidebar.markdown("---")
-st.sidebar.write(f"👤 {st.session_state.get('username', 'User')}")
 st.sidebar.caption("Dashboard User")
+
+st.sidebar.markdown("---")
+if st.sidebar.button("🚪 Logout", key="logout_btn"):
+    st.session_state.logged_in = False
+    st.session_state.username = None
+    if "fp_step" in st.session_state:
+        st.session_state.fp_step = 1
+    st.rerun()
 
 # ---------------- DIAGNOSTICS (captures recent errors) ----------------
 with st.sidebar.expander("Diagnostics / Error Log", expanded=False):
@@ -1828,7 +1834,7 @@ elif menu == "Inventory":
     m1, m2, m3 = st.columns(3)
     m1.metric("Total Products", total_products)
     m2.metric("Total Units", f"{total_units}")
-    m3.metric("Low Stock Items (< {low_threshold})", low_stock_count)
+    m3.metric(f"Low Stock Items (< {low_threshold})", low_stock_count)
 
     st.markdown("---")
 

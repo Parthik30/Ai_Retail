@@ -2,6 +2,8 @@ from dotenv import load_dotenv
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+import csv
+import datetime
 
 load_dotenv()
 
@@ -74,10 +76,9 @@ def init_db():
     """
     Base.metadata.create_all(bind=engine)
 
-    from .models import User
-    import datetime
-
-    # Seeding: Create default user if none exists
+    from .models import User, Product
+    
+    # ── 1. Seeding: Default Admin User ──────────────────────────────────────
     session = SessionLocal()
     try:
         if session.query(User).count() == 0:
@@ -93,6 +94,38 @@ def init_db():
             session.add(default_user)
             session.commit()
             print("Default user 'Parthik' seeded.")
+        
+        # ── 2. Seeding: Products from CSV (if products table is empty) ──────────
+        if session.query(Product).count() == 0:
+            csv_path = os.path.join(os.path.dirname(__file__), "data", "products.csv")
+            if os.path.exists(csv_path):
+                print(f"Seeding products from {csv_path}...")
+                with open(csv_path, mode='r', encoding='utf-8-sig') as f:
+                    reader = csv.DictReader(f)
+                    new_products = []
+                    for row in reader:
+                        p = Product(
+                            product_id=row['product_id'],
+                            product_name=row['product_name'],
+                            category=row.get('category'),
+                            cost_price=float(row.get('cost_price', 0)),
+                            selling_price=float(row.get('selling_price', 0)),
+                            discount=float(row.get('discount', 0)),
+                            stock=int(row.get('stock', 0)),
+                            monthly_sales=int(row.get('monthly_sales', 0)),
+                            demand_level=row.get('demand_level'),
+                            rating=float(row.get('rating', 0)),
+                            supplier_lead_time=int(row.get('supplier_lead_time', 0))
+                        )
+                        new_products.append(p)
+                    
+                    if new_products:
+                        session.bulk_save_objects(new_products)
+                        session.commit()
+                        print(f"Successfully seeded {len(new_products)} products.")
+            else:
+                print(f"Warning: products.csv not found at {csv_path}")
+
     except Exception as e:
         print(f"Seeding failed: {e}")
         session.rollback()
@@ -100,7 +133,6 @@ def init_db():
         session.close()
 
     # development convenience: add registration_id to users if missing
-    # (SQLite doesn't support IF NOT EXISTS on ALTER, so guard carefully)
     try:
         insp = inspect(engine)
         if "users" in insp.get_table_names():
@@ -113,8 +145,8 @@ def init_db():
                         conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS registration_id VARCHAR"))
                     conn.commit()
     except Exception:
-        # ignore any errors here; create_tables.py or migrations should handle it
         pass
+
 
 
 if __name__ == "__main__":

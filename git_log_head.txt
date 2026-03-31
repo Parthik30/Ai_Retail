@@ -1,0 +1,29 @@
+﻿commit 6fad26cc907c894160d52979869836199daeead6
+Author: Parthik <176750447+Parthik30@users.noreply.github.com>
+Date:   Mon Mar 30 18:45:26 2026 +0530
+
+    fix(db): ensure tables are initialized on startup to prevent no such table error
+
+commit 91d9dbed5b672f52e035fed81c40fea488e1f3e4
+Author: Parthik <176750447+Parthik30@users.noreply.github.com>
+Date:   Mon Mar 30 18:28:25 2026 +0530
+
+    fix(deploy): skip virtual environments in docker build via .dockerignore
+
+commit 3b891e2e4f10f31d4985c991fea42ff37216f452
+Author: Parthik <176750447+Parthik30@users.noreply.github.com>
+Date:   Mon Mar 30 16:22:40 2026 +0530
+
+    fix: revert to robust docker SDK from freezing streamlit SDK, configure user 1000
+
+commit 60af6c453d3516e42394f03893021f6de0708987
+Author: Parthik <176750447+Parthik30@users.noreply.github.com>
+Date:   Mon Mar 30 15:31:54 2026 +0530
+
+    fix: remove Dockerfile and Streamlit config to resolve HF Crash loop
+
+commit 07ffb019fe68edee533b5c8cccab810b5f34f644
+Author: Parthik <176750447+Parthik30@users.noreply.github.com>
+Date:   Mon Mar 30 14:34:44 2026 +0530
+
+    fix: force trigger rebuild to clear zombie queue
