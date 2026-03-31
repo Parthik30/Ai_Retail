@@ -9,7 +9,20 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-from backend.services.dashboard_service import get_dashboard_data, get_demand_pattern_classification
+from backend.services.dashboard_service import (
+    get_dashboard_data, 
+    get_demand_pattern_classification
+)
+import streamlit as st # Ensure streamlit is available for decorators
+
+# ── Caching expensive service calls ──
+@st.cache_data(ttl=300) # Cache for 5 minutes
+def cached_get_dashboard_data(product):
+    return get_dashboard_data(product)
+
+@st.cache_data(ttl=600) # Cache for 10 minutes
+def cached_get_demand_pattern_classification():
+    return get_demand_pattern_classification()
 import backend.services.inventory_service as inv_service
 import backend.services.discount_service as disc_service
 import backend.services.ai_service as ai_service
@@ -1274,7 +1287,7 @@ if menu == "Dashboard":
         st.image("https://img.icons8.com/fluency/48/000000/warehouse.png", width=42)
 
     try:
-        data = get_dashboard_data(selected_product)
+        data = cached_get_dashboard_data(selected_product)
     except ValueError as e:
         st.error(str(e))
         st.stop()
@@ -1373,25 +1386,7 @@ if menu == "Dashboard":
         # Ensure df is loaded from DB when available (some earlier code paths may not have set df)
         try:
             if 'df' not in locals() or df is None:
-                from backend.db import SessionLocal
-                from backend.models import Product
-                session = SessionLocal()
-                rows = session.query(Product).all()
-                session.close()
-                if rows:
-                    df = pd.DataFrame([{
-                        "product_id": r.product_id,
-                        "product_name": r.product_name,
-                        "category": r.category,
-                        "selling_price": r.selling_price,
-                        "cost_price": r.cost_price,
-                        "discount": r.discount,
-                        "stock": r.stock,
-                        "monthly_sales": r.monthly_sales,
-                        "demand_level": r.demand_level,
-                        "rating": r.rating,
-                        "supplier_lead_time": r.supplier_lead_time
-                    } for r in rows])
+                df = load_products()
         except Exception:
             # fallback: if df not defined yet, read CSV
             if 'df' not in locals() or df is None:
