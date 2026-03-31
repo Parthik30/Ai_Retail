@@ -1192,6 +1192,17 @@ def load_products():
 df = load_products()
 products = df["product_name"].tolist()
 
+# ---------------- GLOBAL CSS (Whitespace fix) ----------------
+st.markdown(
+    """
+    <style>
+    .block-container { max-width: 100% !important; width: 100% !important; padding: 1.5rem 2.5rem !important; }
+    .stApp { min-width: unset !important; }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # ---------------- DASHBOARD PAGE ----------------
 if menu == "Dashboard":
 
@@ -1199,9 +1210,6 @@ if menu == "Dashboard":
     st.markdown(
         """
         <style>
-        /* Page background and card styling */
-        .block-container { max-width: 100% !important; width: 100% !important; padding: 16px 28px !important; }
-        .stApp { min-width: unset !important; }
         .dashboard-container {max-width:100%;margin:0 auto;padding:20px}
         
     /* KPI Row and individual KPI styling */
