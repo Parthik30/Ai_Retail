@@ -1276,15 +1276,12 @@ if menu == "Dashboard":
         unsafe_allow_html=True,
     )
 
-    st.markdown("<div class='dashboard-card'>", unsafe_allow_html=True)
-
     # --- Header / Product selector + KPI row ---
     top_col1, top_col2 = st.columns([3, 1])
     with top_col1:
         st.markdown("<h2 style='margin:0 0 4px 0'>Dashboard</h2>", unsafe_allow_html=True)
         selected_product = st.selectbox("Search product", products)
-    with top_col2:
-        st.image("https://img.icons8.com/fluency/48/000000/warehouse.png", width=42)
+    # Col2 removed (logo)
 
     try:
         data = cached_get_dashboard_data(selected_product)
@@ -1313,7 +1310,6 @@ if menu == "Dashboard":
     left, right = st.columns([3, 3])
 
     with left:
-        st.markdown("<div class='overview dashboard-card'>", unsafe_allow_html=True)
         st.markdown(f"<h4 style='margin-bottom:6px'>Overview</h4>", unsafe_allow_html=True)
         # show product name with classification badge(s)
         # display internal classification and AI prediction
@@ -1381,7 +1377,6 @@ if menu == "Dashboard":
         st.markdown("</div>", unsafe_allow_html=True)
 
     with right:
-        st.markdown("<div class='stock-info dashboard-card'>", unsafe_allow_html=True)
         st.subheader("Stock Info")
         # Ensure df is loaded from DB when available (some earlier code paths may not have set df)
         try:
@@ -1442,7 +1437,6 @@ if menu == "Dashboard":
             if prod_cat:
                 st.session_state["category_selected"] = prod_cat
 
-        st.markdown("<div style='width:calc(100% + 56px); margin:-4px -28px 32px -28px; padding:28px; background:white; border-radius:14px; box-shadow:0 4px 16px rgba(0,0,0,0.08); border:1px solid #f1f5f9; box-sizing:border-box;'>", unsafe_allow_html=True)
         st.subheader("Category Revenue")
         category_choice = st.selectbox("Category", options=categories, key="category_selected")
 
@@ -1531,8 +1525,7 @@ if menu == "Dashboard":
                 st.plotly_chart(bar_fig, use_container_width=True)
 
             # --- AI Insights Section ---
-            st.markdown("<div style='width:calc(100% + 56px); margin:32px -28px 16px -28px; padding:28px; background:white; border-radius:14px; box-shadow:0 4px 16px rgba(0,0,0,0.08); border:1px solid #f1f5f9; box-sizing:border-box;'>", unsafe_allow_html=True)
-            st.markdown("<h4 style='margin:0 0 24px 0; color:#1a1a2e; font-weight:700; font-size:20px; font-family:\'Times New Roman\', Times, serif;'>AI Insights</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='margin:32px 0 24px 0; color:#1a1a2e; font-weight:700; font-size:20px; font-family:\'Times New Roman\', Times, serif;'>AI Insights</h4>", unsafe_allow_html=True)
 
             top_items = df.sort_values("monthly_sales", ascending=False).head(3)
             insights = [f"{row['product_name']} — {int(row['monthly_sales'])} sold" for _, row in top_items.iterrows()]
@@ -1554,7 +1547,7 @@ if menu == "Dashboard":
             cards_html += "</div>"
             st.markdown(cards_html, unsafe_allow_html=True)
 
-            st.markdown("</div>", unsafe_allow_html=True)
+            # AI Insights wrapper end removed
 
             # Demo images feature removed per request
             # (Was previously showing category/product thumbnails. Removed to keep UI clean.)
@@ -1571,9 +1564,9 @@ if menu == "Dashboard":
     breakdown_display = breakdown.rename(columns={'name': 'Category/Product', 'revenue': 'Revenue', 'pct': '% of Total'})
     
     # Create styled HTML table
-    breakdown_html = '<div style="margin: 32px 0; padding: 28px; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; overflow-x: auto;">'
+    breakdown_html = '<div style="margin: 32px 0;">'
     breakdown_html += '<h4 style="margin: 0 0 20px 0; color: #1a1a2e; font-weight: 700; font-size: 18px; font-family: \'Times New Roman\', Times, serif;">Exact Breakdown</h4>'
-    breakdown_html += '<table style="width: 100%; border-collapse: collapse; font-family: \'Times New Roman\', Times, serif;">'
+    breakdown_html += '<table style="width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.08); font-family: \'Times New Roman\', Times, serif;">'
     breakdown_html += '<tr style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 2px solid #e2e8f0;">'
     for col in breakdown_display.columns:
         breakdown_html += f'<th style="padding: 18px 20px; text-align: left; font-weight: 700; color: #475569; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">{col}</th>'
