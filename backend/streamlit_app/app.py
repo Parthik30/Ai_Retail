@@ -358,6 +358,7 @@ if not st.session_state.logged_in:
                         else:
                             st.session_state.logged_in = True
                             st.session_state.username = user.username
+                            st.session_state.role = user.role or "User"
                             st.rerun()
                     except (ProgrammingError, OperationalError):
                         session.rollback()
@@ -1143,6 +1144,9 @@ st.sidebar.markdown(
 )
 
 nav_items = ["Dashboard", "Inventory", "Stockouts & Lost Sales", "Management", "Pricing", "Reports"]
+if st.session_state.get("role") == "super_admin":
+    nav_items.append("User Management")
+
 menu = st.sidebar.radio(
     "Navigation",
     nav_items,
@@ -1209,8 +1213,14 @@ products = df["product_name"].tolist()
 st.markdown(
     """
     <style>
-    .block-container { max-width: 100% !important; width: 100% !important; padding: 1.5rem 2.5rem !important; }
-    .stApp { min-width: unset !important; }
+    /* Maximize space for an 'App' feeling (especially online) */
+    .block-container { max-width: 100% !important; width: 100% !important; padding: 1rem 3rem !important; }
+    .stApp { min-width: unset !important; background-color: #f8fafc !important; }
+    header[data-testid="stHeader"] { height: 3rem !important; }
+    footer { visibility: hidden !important; }
+    
+    /* Neumorphic text inputs for global consistency */
+    div[data-baseweb="input"] { border-radius: 8px !important; }
     </style>
     """,
     unsafe_allow_html=True
@@ -1308,9 +1318,18 @@ if menu == "Dashboard":
 
     # --- Main content: left overview and right summary ---
     left, right = st.columns([3, 3])
-
     with left:
-        st.markdown(f"<h4 style='margin-bottom:6px'>Overview</h4>", unsafe_allow_html=True)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Income (this month)", "₹53,790", "+5.1%")
+            st.progress(0.51)
+        with col2:
+            st.metric("Expenses (this month)", "₹10,701", "-2.3%")
+            st.progress(0.29)
+        
+        st.markdown("<hr style='margin: 20px 0; opacity: 0.1;'>", unsafe_allow_html=True)
+        
+        st.markdown(f"<h4 style='margin-bottom:12px'>Product Overview</h4>", unsafe_allow_html=True)
         # show product name with classification badge(s)
         # display internal classification and AI prediction
         value_class = data.get('value_class', 'C')
@@ -1335,97 +1354,48 @@ if menu == "Dashboard":
 
         # build label text including AI prediction
         ai_text = f" (AI: {ai_value}-{ai_pattern} conf:{int(ai_conf*100)}%)" if ai_value and ai_pattern else ""
-        st.markdown(f"<strong style='font-size:20px'>{selected_product}</strong> <span class='badge {badge_cls}'>{display_vc}</span> <span class='badge {pattern_cls}' style='margin-left:6px'>{display_dp}</span> <span class='badge {season_cls}' style='margin-left:6px'>{display_s}</span><small style='margin-left:8px;color:#6b7280'>{ai_text}</small>", unsafe_allow_html=True)
-        st.markdown("<div style='margin-top:10px'>", unsafe_allow_html=True)
-        st.metric("Price", f"₹{data.get('price', 0):,.2f}")
-        st.metric("Units in Stock", int(data.get('stock', 0)))
-        st.metric("Current Discount", f"{data.get('discount', 0)}%")
+        st.markdown(f"<strong style='font-size:20px'>{selected_product}</strong>", unsafe_allow_html=True)
+        st.markdown(f"<div style='margin: 8px 0;'><span class='badge {badge_cls}'>{display_vc}</span> <span class='badge {pattern_cls}' style='margin-left:6px'>{display_dp}</span> <span class='badge {season_cls}' style='margin-left:6px'>{display_s}</span><small style='margin-left:8px;color:#6b7280'>{ai_text}</small></div>", unsafe_allow_html=True)
+        
+        m_col1, m_col2, m_col3 = st.columns(3)
+        with m_col1:
+            st.metric("Price", f"₹{data.get('price', 0):,.2f}")
+        with m_col2:
+            st.metric("Stock", int(data.get('stock', 0)))
+        with m_col3:
+            st.metric("Discount", f"{data.get('discount', 0)}%")
 
-        # --- AI discount recommendation (demand, festival, stock aware) ---
-        # Allow user to choose optimization objective
-        objective = st.selectbox("Optimize AI discount for", options=["Profit", "Revenue"], index=0, key='ai_opt_objective')
+        # --- AI discount recommendation (Default: Profit) ---
+        st.markdown("**AI Optimization (Profit Goal)**")
+        objective = "profit"
         try:
             prod_row = df.loc[df['product_name'] == selected_product].iloc[0].to_dict()
             ai_rec = disc_service.ai_recommend_discount(prod_row, objective=objective.lower())
-            # also compute the alternate objective for quick comparison
-            alt_obj = 'revenue' if objective.lower() == 'profit' else 'profit'
-            alt_rec = disc_service.ai_recommend_discount(prod_row, objective=alt_obj)
-        except Exception as e:
-            prod_row = None
+        except Exception:
             ai_rec = None
-            alt_rec = None
 
         if ai_rec:
-            st.markdown(f"**AI suggested discount (opt: {objective}) :** {ai_rec['recommended_discount']}% (confidence: {ai_rec['confidence']*100:.0f}%)")
-            with st.expander("See projection details"):
-                st.write(f"Projected units: {ai_rec['expected_units']}")
-                st.write(f"Projected revenue: ₹{ai_rec['expected_revenue']:,.0f}")
-                st.write(f"Projected profit: ₹{ai_rec['expected_profit']:,.0f}")
-                if alt_rec:
-                    st.info(f"If optimized for {alt_obj.title()}, suggestion would be {alt_rec['recommended_discount']}% — revenue: ₹{alt_rec['expected_revenue']:,.0f}, profit: ₹{alt_rec['expected_profit']:,.0f}")
+            st.markdown(f"<div style='font-size:13px; color: #475569;'>Suggested: <b style='color:#2563eb'>{ai_rec['recommended_discount']}%</b> ({int(ai_rec['confidence']*100)}% conf)</div>", unsafe_allow_html=True)
+            
+            # --- SHOW OUTPUT DETAILS ---
+            with st.expander("📊 View Projected Outcome"):
+                st.markdown(f"""
+                <div style='padding:10px; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0;'>
+                    <div style='margin-bottom:8px'><small>Expected Sales</small><br><b>{ai_rec['expected_units']} units/mo</b></div>
+                    <div style='margin-bottom:8px'><small>Expected Revenue</small><br><b>₹{ai_rec['expected_revenue']:,.0f}</b></div>
+                    <div><small>Expected Profit</small><br><b style='color:#10b981'>₹{ai_rec['expected_profit']:,.0f}</b></div>
+                </div>
+                """, unsafe_allow_html=True)
+                st.info("💡 You can apply this discount in the section at the bottom of the page.")
 
-                # Recommendation actions removed per request: these suggestions are informational only. Use the main "Apply Discount" control further down to persist any price changes.
-
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("Income (this month)", "₹53,790", "+5.1%")
-            st.progress(0.51)
-        with col2:
-            st.metric("Expenses (this month)", "₹10,701", "-2.3%")
-            st.progress(0.29)
-        st.markdown("</div>", unsafe_allow_html=True)
 
     with right:
-        st.subheader("Stock Info")
-        # Ensure df is loaded from DB when available (some earlier code paths may not have set df)
-        try:
-            if 'df' not in locals() or df is None:
-                df = load_products()
-        except Exception:
-            # fallback: if df not defined yet, read CSV
-            if 'df' not in locals() or df is None:
-                df = pd.read_csv(os.path.join(BACKEND_DIR, "data", "products.csv"))
-
-        stock_chart = pd.DataFrame({
-            "Type": ["High Stock", "Near Low", "Low Stock"],
-            "Count": [
-                (df["stock"] > 100).sum(),
-                ((df["stock"] >= 20) & (df["stock"] <= 100)).sum(),
-                (df["stock"] < 20).sum()
-            ]
-        })
+        st.markdown(f"<h4 style='margin-bottom:12px'>Category Revenue</h4>", unsafe_allow_html=True)
         
-        # Create Plotly bar chart with values inside bars
-        fig_stock = px.bar(
-            stock_chart,
-            x='Type',
-            y='Count',
-            text='Count',
-            labels={'Count': 'Number of Products', 'Type': ''},
-            color='Type',
-            color_discrete_map={'High Stock': '#10b981', 'Near Low': '#f59e0b', 'Low Stock': '#ef4444'}
-        )
-        fig_stock.update_traces(
-            textposition='inside',
-            textfont=dict(size=16, color='white', weight='bold'),
-            marker=dict(line=dict(color='white', width=1)),
-            hovertemplate='<b>%{x}</b><br>Count: %{y}<extra></extra>'
-        )
-        fig_stock.update_layout(
-            showlegend=False,
-            margin=dict(t=20, b=20, l=10, r=10),
-            height=300,
-            xaxis_title='',
-            yaxis_title='Number of Products'
-        )
-        st.plotly_chart(fig_stock, use_container_width=True)
-
-        # --- Category selector and Revenue donut placed above Stock Info ---
+        # --- Category selector and Revenue donut ---
         existing_cats = sorted(df["category"].dropna().unique().tolist())
         categories = ["All"] + existing_cats
 
-        # Session state defaults and auto-sync with selected product
         if "category_selected" not in st.session_state:
             st.session_state["category_selected"] = "All"
         try:
@@ -1437,152 +1407,76 @@ if menu == "Dashboard":
             if prod_cat:
                 st.session_state["category_selected"] = prod_cat
 
-        st.subheader("Category Revenue")
-        category_choice = st.selectbox("Category", options=categories, key="category_selected")
+        category_choice = st.selectbox("Select Category", options=categories, key="category_selected", label_visibility="collapsed")
 
-        # Compute aggregated revenue depending on filter
+        # Compute aggregated revenue
         if category_choice == "All":
-            agg = (
-                df.assign(revenue=df["selling_price"] * df["monthly_sales"]) 
-                  .groupby("category")["revenue"]
-                  .sum()
-                  .sort_values(ascending=False)
-            )
+            agg = (df.assign(revenue=df["selling_price"] * df["monthly_sales"])
+                  .groupby("category")["revenue"].sum().sort_values(ascending=False))
             labels = agg.index.tolist()
             sizes = agg.values.tolist()
-            title = "Revenue by Category"
         else:
-            agg = (
-                df[df["category"] == category_choice]
-                  .assign(revenue=lambda d: d["selling_price"] * d["monthly_sales"]) 
-                  .groupby("product_name")["revenue"]
-                  .sum()
-                  .sort_values(ascending=False)
-            )
+            agg = (df[df["category"] == category_choice]
+                  .assign(revenue=lambda d: d["selling_price"] * d["monthly_sales"])
+                  .groupby("product_name")["revenue"].sum().sort_values(ascending=False))
             labels = agg.index.tolist()
             sizes = agg.values.tolist()
-            title = f"Revenue in {category_choice} (by product)"
 
-        if agg.empty:
-            st.info("No revenue data to show for selected category")
-        else:
-            # combine small slices into "Other"
+        if not agg.empty:
             if len(labels) > 6:
                 top = agg.iloc[:6]
                 others = agg.iloc[6:].sum()
                 labels = top.index.tolist() + ["Other"]
                 sizes = list(top.values) + [others]
 
-            # Use Plotly for a cleaner donut with labels outside + a small bar chart underneath
+        if not agg.empty:
             import plotly.graph_objects as go
-            import plotly.express as px
-
-            total = sum(sizes) if sum(sizes) > 0 else 1
-
-            # Donut with labels outside and legend on top
-            fig = go.Figure()
-            fig.add_trace(go.Pie(
-                labels=labels,
-                values=sizes,
-                hole=0.45,
-                sort=False,
-                textinfo='percent',
-                textposition='inside',
-                insidetextorientation='radial',
-                marker=dict(line=dict(color='white', width=2)),
-                hovertemplate='%{label}<br>₹%{value:,.0f}<br>%{percent}'
-            ))
-
-            fig.update_traces(hoverinfo='label+percent+value', marker=dict(colors=px.colors.qualitative.Plotly))
+            fig = go.Figure(data=[go.Pie(
+                labels=labels, values=sizes, hole=0.5,
+                marker=dict(colors=px.colors.qualitative.Pastel),
+                textinfo='percent', textposition='inside'
+            )])
             fig.update_layout(
                 showlegend=True,
-                legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='center', x=0.5),
-                margin=dict(t=40, b=10, l=10, r=10),
-                height=360
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+                margin=dict(t=40, b=0, l=0, r=0),
+                height=300
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+            breakdown_mini = pd.DataFrame({
+                'Name': labels,
+                'Revenue': [f"₹{s:,.0f}" for s in sizes]
+            })
+            with st.expander("Show detailed revenue list"):
+                st.markdown(render_professional_table(breakdown_mini, columns_style={'Revenue': {'align': 'right'}}), unsafe_allow_html=True)
+
+    # --- AI Insights (Full Width) ---
+    st.markdown("<hr style='margin: 30px 0; opacity: 0.1;'>", unsafe_allow_html=True)
+    st.markdown("<h4 style='color:#1a1a2e; font-weight:700; font-size:20px; margin-bottom: 20px;'>AI Insights</h4>", unsafe_allow_html=True)
+
+    top_items = df.sort_values("monthly_sales", ascending=False).head(3)
+    
+    ins_col1, ins_col2, ins_col3 = st.columns(3)
+    cols = [ins_col1, ins_col2, ins_col3]
+    
+    for i, (_, row) in enumerate(top_items.iterrows()):
+        with cols[i]:
+            stock_val = row['stock']
+            stock_label = "🟢 In Stock" if stock_val > 20 else "🔴 Low Stock"
+            st.markdown(
+                f"""
+                <div style='padding:24px; border-radius:18px; background:white; border:1px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.03); text-align:center;'>
+                    <div style='color:#64748b; font-size:12px; font-weight:700; text-transform:uppercase; margin-bottom:8px;'>Top Performer</div>
+                    <div style='color:#1a1a2e; font-size:18px; font-weight:800; margin-bottom:12px;'>{row['product_name']}</div>
+                    <div style='color:#475569; font-size:15px; font-weight:600; margin-bottom:12px;'>{int(row['monthly_sales'])} sold/mo</div>
+                    <div style='color:#2563eb; font-weight:700;'>{stock_label}</div>
+                </div>
+                """,
+                unsafe_allow_html=True
             )
 
-            # Side-by-side columns to fill the white space dynamically!
-            col_pie, col_bar = st.columns([2,3], gap="medium")
-            
-            with col_pie:
-                st.plotly_chart(fig, use_container_width=True)
 
-            with col_bar:
-                # Small bar chart to show exact values (order by values)
-                bar_df = pd.DataFrame({'label': labels, 'revenue': sizes})
-                bar_df = bar_df.sort_values('revenue', ascending=False)
-                bar_fig = px.bar(bar_df, x='label', y='revenue', text='revenue', labels={'label': '', 'revenue': 'Revenue (₹)'} )
-                bar_fig.update_traces(texttemplate='₹%{text:,.0f}', textposition='outside', marker_color=px.colors.qualitative.Plotly)
-                bar_fig.update_layout(
-                    margin=dict(t=10,b=10,l=10,r=10), 
-                    height=360, 
-                    xaxis_tickangle=-45,
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    paper_bgcolor='rgba(0,0,0,0)'
-                )
-                bar_fig.update_xaxes(showgrid=False)
-                bar_fig.update_yaxes(showgrid=True, gridcolor='#f1f5f9')
-                st.plotly_chart(bar_fig, use_container_width=True)
-
-            # --- AI Insights Section ---
-            st.markdown("<h4 style='margin:32px 0 24px 0; color:#1a1a2e; font-weight:700; font-size:20px; font-family:\'Times New Roman\', Times, serif;'>AI Insights</h4>", unsafe_allow_html=True)
-
-            top_items = df.sort_values("monthly_sales", ascending=False).head(3)
-            insights = [f"{row['product_name']} — {int(row['monthly_sales'])} sold" for _, row in top_items.iterrows()]
-
-            # Cards aligned horizontally to match table width below
-            cards_html = "<div style='display:grid; grid-template-columns: repeat(3, 1fr); gap: 28px; width: 100%;'>"
-            for ins in insights:
-                prod_name = ins.split(' — ')[0]
-                units = ins.split(' — ')[1]
-                stock_val = int(df[df['product_name'] == prod_name]['stock'].iloc[0]) if prod_name in df['product_name'].values else 0
-                stock_label = "🟢 In Stock" if stock_val > 20 else "🔴 Low Stock"
-                cards_html += (
-                    "<div style='min-height:220px; padding:26px; border-radius:14px; background:#f8fafc; border:2px solid #e5e7eb; text-align:center; display:flex; flex-direction:column; justify-content:center; transition: transform 0.2s;'>"
-                    f"<strong style='color:#1a1a2e; font-size:19px; font-family:\"Times New Roman\", Times, serif; font-weight:800; margin-bottom:12px;'>{prod_name}</strong>"
-                    f"<p style='margin:0 0 11px 0; color:#475569; font-family:\"Times New Roman\", Times, serif; font-size:16px; font-weight:600;'>{units} units/mo</p>"
-                    f"<span style='font-family:\"Times New Roman\", Times, serif; font-size:15px; font-weight:700; color:#2563eb;'>{stock_label}</span>"
-                    "</div>"
-                )
-            cards_html += "</div>"
-            st.markdown(cards_html, unsafe_allow_html=True)
-
-            # AI Insights wrapper end removed
-
-            # Demo images feature removed per request
-            # (Was previously showing category/product thumbnails. Removed to keep UI clean.)
-            
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    # Exact breakdown table for accuracy
-    breakdown = pd.DataFrame({
-        'name': labels,
-        'revenue': sizes
-    })
-    breakdown['pct'] = (breakdown['revenue'] / breakdown['revenue'].sum() * 100).round(2)
-    breakdown['revenue'] = breakdown['revenue'].map(lambda x: f"₹{x:,.0f}")
-    breakdown_display = breakdown.rename(columns={'name': 'Category/Product', 'revenue': 'Revenue', 'pct': '% of Total'})
-    
-    # Create styled HTML table
-    breakdown_html = '<div style="margin: 32px 0;">'
-    breakdown_html += '<h4 style="margin: 0 0 20px 0; color: #1a1a2e; font-weight: 700; font-size: 18px; font-family: \'Times New Roman\', Times, serif;">Exact Breakdown</h4>'
-    breakdown_html += '<table style="width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.08); font-family: \'Times New Roman\', Times, serif;">'
-    breakdown_html += '<tr style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 2px solid #e2e8f0;">'
-    for col in breakdown_display.columns:
-        breakdown_html += f'<th style="padding: 18px 20px; text-align: left; font-weight: 700; color: #475569; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">{col}</th>'
-    breakdown_html += '</tr>'
-    
-    for idx, row in breakdown_display.iterrows():
-        breakdown_html += '<tr style="border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s;">'
-        for i, col in enumerate(breakdown_display.columns):
-            value = row[col]
-            align = 'right' if col in ['Revenue', '% of Total'] else 'left'
-            breakdown_html += f'<td style="padding: 16px 20px; text-align: {align}; color: #1a1a2e; font-size: 15px;">{value}</td>'
-        breakdown_html += '</tr>'
-    breakdown_html += '</table>'
-    breakdown_html += '</div>'
-    
-    st.markdown(breakdown_html, unsafe_allow_html=True)
 
     # Add Demand Pattern Classification table
     try:
@@ -1620,36 +1514,10 @@ if menu == "Dashboard":
                 demand_html += '</tr>'
             demand_html += '</table>'
             
-            # Add note about scrolling for additional data
-            demand_html += '<p style="margin-top: 16px; font-size: 13px; color: #64748b; font-style: italic; font-family: \'Times New Roman\', Times, serif;">💡 Additional AI metrics available via expander below</p>'
             demand_html += '</div>'
             
             st.markdown(demand_html, unsafe_allow_html=True)
             
-            # Show AI Metrics in expander
-            with st.expander("📊 View AI Metrics & Analysis"):
-                ai_cols = ['Product', 'CV', 'AI Val', 'AI Pat', 'AI Conf']
-                ai_df = display_df[ai_cols].copy()
-                
-                # Create professional HTML table for AI metrics
-                ai_html = '<div style="margin: 20px 0; padding: 28px; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; overflow-x: auto;">'
-                ai_html += '<table style="width: 100%; border-collapse: collapse; font-family: \'Times New Roman\', Times, serif;">'
-                ai_html += '<tr style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 2px solid #e2e8f0;">'
-                for col in ai_cols:
-                    ai_html += f'<th style="padding: 18px 20px; text-align: left; font-weight: 700; color: #475569; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">{col}</th>'
-                ai_html += '</tr>'
-                
-                for idx, row in ai_df.iterrows():
-                    ai_html += '<tr style="border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s;">'
-                    for col in ai_cols:
-                        value = row[col]
-                        align = 'center' if col in ['AI Pat', 'AI Conf'] else 'left'
-                        ai_html += f'<td style="padding: 16px 20px; text-align: {align}; color: #1a1a2e; font-size: 15px;">{value}</td>'
-                    ai_html += '</tr>'
-                ai_html += '</table>'
-                ai_html += '</div>'
-                
-                st.markdown(ai_html, unsafe_allow_html=True)
         else:
             st.info("No demand pattern data available.")
     except Exception as e:
@@ -3533,6 +3401,87 @@ elif menu == "Reports":
                 st.download_button("Download price audit CSV", data=csv_buf2.getvalue(), file_name="price_audit.csv", mime="text/csv")
             else:
                 st.info("No price audit records found.")
+
+# ---------------- USER MANAGEMENT ----------------
+elif menu == "User Management" and st.session_state.get("role") == "super_admin":
+    st.markdown("<h1>User Management 👥</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#64748b; margin-top:-10px;'>Manage all system users, roles, and account status.</p>", unsafe_allow_html=True)
+
+    from backend.db import SessionLocal
+    from backend.models import User
+    
+    session = SessionLocal()
+    try:
+        users = session.query(User).order_by(User.created_at.desc()).all()
+        
+        # --- TOP KPIS FOR USER MANAGEMENT ---
+        ku1, ku2, ku3 = st.columns(3)
+        ku1.metric("Total Accounts", len(users))
+        ku2.metric("Active Users", len([u for u in users if u.is_active]))
+        ku3.metric("Super Admins", len([u for u in users if u.role == "super_admin"]))
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # --- SEARCH & TABLE ---
+        user_list = []
+        for u in users:
+            user_list.append({
+                "Username": u.username,
+                "Email": u.email,
+                "Role": f"<b>{u.role}</b>" if u.role == "super_admin" else u.role,
+                "Status": "🟢 Active" if u.is_active else "🔴 Inactive",
+                "Joined": u.created_at.strftime("%b %d, %Y") if u.created_at else "N/A"
+            })
+        
+        df_users = pd.DataFrame(user_list)
+        
+        # Custom styles for the table
+        st.markdown(render_professional_table(df_users, columns_style={
+            'Role': {'align': 'center'},
+            'Status': {'align': 'center'}
+        }), unsafe_allow_html=True)
+        
+        st.markdown("<hr style='margin: 40px 0; opacity: 0.1;'>", unsafe_allow_html=True)
+        
+        # --- MANAGE ACTIONS ---
+        st.subheader("Manage Selection")
+        with st.container(border=True):
+            col_act1, col_act2 = st.columns([2, 1], gap="large")
+            
+            with col_act1:
+                target_user = st.selectbox("Select user to modify", options=[u.username for u in users], help="Select an account to edit its properties or role.")
+                selected_u = session.query(User).filter(User.username == target_user).first()
+                
+                if selected_u:
+                    sub_col1, sub_col2 = st.columns(2)
+                    with sub_col1:
+                        roles_list = ["User", "Admin", "super_admin"]
+                        current_role_idx = roles_list.index(selected_u.role) if selected_u.role in roles_list else 0
+                        new_role = st.selectbox("Update Role", options=roles_list, index=current_role_idx)
+                    with sub_col2:
+                        st.markdown("<br>", unsafe_allow_html=True)
+                        is_active = st.checkbox("Account is Active", value=selected_u.is_active, key=f"active_{selected_u.user_id}")
+                    
+                    if st.button("SAVE CHANGES", use_container_width=True, type="primary"):
+                        selected_u.role = new_role
+                        selected_u.is_active = is_active
+                        session.commit()
+                        st.success(f"Successfully updated configuration for {target_user}!")
+                        st.rerun()
+                        
+            with col_act2:
+                st.markdown("<p style='font-size:14px; font-weight:600; color:#ef4444;'>Danger Zone</p>", unsafe_allow_html=True)
+                if st.button("DELETE PERMANENTLY", use_container_width=True):
+                    if target_user == st.session_state.username:
+                        st.error("Security Lock: You cannot delete your own account while logged in.")
+                    else:
+                        session.delete(selected_u)
+                        session.commit()
+                        st.success(f"Deleted user {target_user}")
+                        st.rerun()
+                        
+    finally:
+        session.close()
 
 # ---------------- OTHER PAGES ----------------
 else:

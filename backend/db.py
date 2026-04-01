@@ -93,7 +93,22 @@ def init_db():
             )
             session.add(default_user)
             session.commit()
-            print("Default user 'Parthik' seeded.")
+            print("Default admin user 'Parthik' seeded.")
+        
+        # ── 1b. Seeding: Default Super Admin User ──────────────────────────────
+        if session.query(User).filter(User.role == "super_admin").count() == 0:
+            super_admin = User(
+                user_id="SU_001",
+                username="admin",
+                email="admin@intellistock.com",
+                password_hash="admin123", # Plain text for dev/seed simplicity
+                role="super_admin",
+                is_active=True,
+                created_at=datetime.datetime.utcnow()
+            )
+            session.add(super_admin)
+            session.commit()
+            print("Default super_admin 'admin' seeded.")
         
         # ── 2. Seeding: Products from CSV (if products table is empty) ──────────
         if session.query(Product).count() == 0:
