@@ -859,8 +859,8 @@ st.markdown(
     .kpi .label { font-family: 'Times New Roman', Times, serif !important; letter-spacing: 0.5px !important; }
     .kpi .value { font-family: 'Times New Roman', Times, serif !important; letter-spacing: -0.5px !important; }
 
-    /* ── Headings ── */
-    h1, h2, h3, h4, p, span, div {
+    /* ── Headings & Text ── */
+    h1, h2, h3, h4, p, span, div, label, li, a, td, th {
         color: var(--text-main) !important;
     }
     h1, h2, h3, h4 {
@@ -962,9 +962,9 @@ st.markdown(
         font-size: 1.8rem !important;
         letter-spacing: -0.5px !important;
     }
-    div[data-testid="stMetricLabel"] {
+    div[data-testid="stMetricLabel"], div[data-testid="stMetricLabel"] > div, div[data-testid="stMetricLabel"] > label, div[data-testid="stMetricLabel"] > p {
         font-family: 'Times New Roman', Times, serif !important;
-        color: #64748b !important;
+        color: var(--text-muted) !important;
         font-weight: 600 !important;
         font-size: 12px !important;
         text-transform: uppercase !important;
