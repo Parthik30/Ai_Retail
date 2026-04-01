@@ -1289,7 +1289,7 @@ if menu == "Dashboard":
     # --- Header / Product selector + KPI row ---
     top_col1, top_col2 = st.columns([3, 1])
     with top_col1:
-        st.markdown("<h2 style='margin:0 0 4px 0'>Dashboard [v2.2]</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='margin:0 0 4px 0'>Dashboard</h2>", unsafe_allow_html=True)
         selected_product = st.selectbox("Search product", products)
     # Col2 removed (logo)
 
@@ -1500,23 +1500,30 @@ if menu == "Dashboard":
             core_cols = ['Product', 'Class', 'Pattern', 'Season']
             core_df = display_df[core_cols].copy()
             
-            # Create professional HTML table for core columns (with vertical scroll)
-            demand_html = '<div style="margin: 32px 0; padding: 28px; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; overflow-x: auto; max-height: 480px; overflow-y: auto;">'
-            demand_html += '<h4 style="margin: 0 0 20px 0; color: #1a1a2e; font-weight: 700; font-size: 18px; font-family: \'Times New Roman\', Times, serif;">Demand Pattern Classification</h4>'
-            demand_html += '<table style="width: 100%; border-collapse: collapse; font-family: \'Times New Roman\', Times, serif;">'
-            demand_html += '<tr style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 2px solid #e2e8f0;">'
-            for col in core_cols:
-                demand_html += f'<th style="padding: 18px 20px; text-align: left; font-weight: 700; color: #475569; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">{col}</th>'
-            demand_html += '</tr>'
+            # Create professional HTML table with double-sticky header (Title + Columns)
+            demand_html = '<div style="margin: 32px 0; padding: 0; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; overflow-x: auto; max-height: 520px; overflow-y: auto; position: relative;">'
             
+            # 1. Sticky Title
+            demand_html += '<div style="position: sticky; top: 0; background: white; z-index: 20; padding: 24px 28px 10px 28px; border-bottom: 1px solid #f1f5f9;">'
+            demand_html += '<h4 style="margin: 0; color: #1a1a2e; font-weight: 700; font-size: 18px; font-family: \'Times New Roman\', Times, serif;">Demand Pattern Classification</h4>'
+            demand_html += '</div>'
+            
+            demand_html += '<table style="width: 100%; border-collapse: collapse; font-family: \'Times New Roman\', Times, serif;">'
+            
+            # 2. Sticky Table Header (adjusted top to sit below the Title)
+            demand_html += '<thead><tr style="background: #f8fafc;">'
+            for col in core_cols:
+                demand_html += f'<th style="position: sticky; top: 60px; background: #f8fafc; z-index: 10; padding: 18px 28px; text-align: left; font-weight: 700; color: #475569; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0;">{col}</th>'
+            demand_html += '</tr></thead>'
+            
+            demand_html += '<tbody>'
             for idx, row in core_df.iterrows():
                 demand_html += '<tr style="border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s;">'
                 for col in core_cols:
                     value = row[col]
-                    demand_html += f'<td style="padding: 16px 20px; text-align: left; color: #1a1a2e; font-size: 15px;">{value}</td>'
+                    demand_html += f'<td style="padding: 16px 28px; text-align: left; color: #1a1a2e; font-size: 15px;">{value}</td>'
                 demand_html += '</tr>'
-            demand_html += '</table>'
-            
+            demand_html += '</tbody></table>'
             demand_html += '</div>'
             
             st.markdown(demand_html, unsafe_allow_html=True)
@@ -1527,11 +1534,11 @@ if menu == "Dashboard":
         st.warning(f"Failed to load demand pattern classification: {e}")
 
     # ---------------- APPLY DISCOUNT ----------------
+    st.markdown('<div style="margin: 20px 0; padding: 24px; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1px solid #f1f5f9;">', unsafe_allow_html=True)
     if data.get("discount", 0) == 0:
         st.info("No discount recommended for this product.")
     else:
-        st.write("")
-        st.markdown("**Apply Recommended Discount**")
+        st.markdown("<h4 style='margin:0 0 16px 0; color:#1a1a2e; font-size:18px;'>Apply Recommended Discount</h4>", unsafe_allow_html=True)
         persist = st.checkbox("Persist discount to CSV/DB (make change permanent)", value=False)
         if st.button("Apply Discount", key="apply_discount"):
             try:
@@ -1580,12 +1587,14 @@ if menu == "Dashboard":
                     st.success(f"Applied {data['discount']}% discount to {selected_product} (session-only). New price: ₹{data['final_price']:,.2f}")
             except Exception as e:
                 st.error(f"Failed to apply discount: {e}")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("---")
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    # Keep Add Product expander (unchanged)
-    st.subheader("Add New Product")
-    with st.expander("Add product to catalog", expanded=False):
+    # Keep Add Product expander (unchanged, but in a card)
+    st.markdown('<div style="margin: 20px 0; padding: 24px; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1px solid #f1f5f9;">', unsafe_allow_html=True)
+    st.markdown("<h4 style='margin:0 0 16px 0; color:#1a1a2e; font-size:18px;'>Quick Actions</h4>", unsafe_allow_html=True)
+    with st.expander("Add new product to catalog", expanded=False):
         with st.form("add_product_form"):
             pid = st.text_input("Product ID")
             name = st.text_input("Product Name")
@@ -1681,6 +1690,7 @@ if menu == "Dashboard":
                                 st.experimental_rerun()
                         except Exception as e:
                             st.error(f"Failed to add product: {e}")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 
