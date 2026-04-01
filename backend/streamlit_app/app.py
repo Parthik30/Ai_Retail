@@ -1497,8 +1497,8 @@ if menu == "Dashboard":
             core_cols = ['Product', 'Class', 'Pattern', 'Season']
             core_df = display_df[core_cols].copy()
             
-            # Create professional HTML table for core columns
-            demand_html = '<div style="margin: 32px 0; padding: 28px; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; overflow-x: auto;">'
+            # Create professional HTML table for core columns (with vertical scroll)
+            demand_html = '<div style="margin: 32px 0; padding: 28px; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; overflow-x: auto; max-height: 480px; overflow-y: auto;">'
             demand_html += '<h4 style="margin: 0 0 20px 0; color: #1a1a2e; font-weight: 700; font-size: 18px; font-family: \'Times New Roman\', Times, serif;">Demand Pattern Classification</h4>'
             demand_html += '<table style="width: 100%; border-collapse: collapse; font-family: \'Times New Roman\', Times, serif;">'
             demand_html += '<tr style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 2px solid #e2e8f0;">'
