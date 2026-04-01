@@ -1289,7 +1289,7 @@ if menu == "Dashboard":
     # --- Header / Product selector + KPI row ---
     top_col1, top_col2 = st.columns([3, 1])
     with top_col1:
-        st.markdown("<h2 style='margin:0 0 4px 0'>Dashboard</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='margin:0 0 4px 0'>Dashboard [v2.2]</h2>", unsafe_allow_html=True)
         selected_product = st.selectbox("Search product", products)
     # Col2 removed (logo)
 
@@ -1299,9 +1299,12 @@ if menu == "Dashboard":
         st.error(str(e))
         st.stop()
 
-    total_revenue = data.get("sales", 0) * data.get("final_price", 0)
-    units_sold = data.get("sales", 0)
-    avg_price = data.get("final_price", 0)
+    # Safe calculation for total revenue and other metrics
+    total_sales = float(data.get("sales") or 0.0)
+    total_price = float(data.get("final_price") or 0.0)
+    total_revenue = total_sales * total_price
+    units_sold = int(total_sales)
+    avg_price = total_price
     turnover = data.get("turnover", "N/A")
 
     kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
