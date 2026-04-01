@@ -620,10 +620,10 @@ def render_professional_table(df, title="", columns_style=None):
     if title:
         html += f'<h4 style="margin-bottom: 16px; color: #1a1a2e; font-weight: 700;">{title}</h4>'
     
-    html += '<table style="width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.08);">'
+    html += '<table style="width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px var(--kpi-shadow);">'
     
     # Header
-    html += '<thead><tr style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 2px solid #e2e8f0;">'
+    html += '<thead><tr style="background: var(--input-bg); border-bottom: 2px solid var(--border-color);">'
     for col in df.columns:
         align = columns_style.get(col, {}).get('align', 'left')
         html += f'<th style="padding: 14px 16px; text-align: {align}; font-weight: 700; color: #475569; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; font-family: \'Times New Roman\', Times, serif;">{col}</th>'
@@ -639,9 +639,9 @@ def render_professional_table(df, title="", columns_style=None):
             # Format value with styling
             cell_style = columns_style.get(col, {})
             bg_color = cell_style.get('bg_color', 'transparent')
-            text_color = cell_style.get('color', '#1a1a2e')
+            text_color = cell_style.get('color', 'var(--text-main)')
             
-            html += f'<td style="padding: 12px 16px; text-align: {align}; color: {text_color}; background-color: {bg_color}; font-family: \'Times New Roman\', Times, serif; font-size: 14px;">{value}</td>'
+            html += f'<td style="padding: 12px 16px; text-align: {align}; color: {text_color}; background-color: {bg_color}; font-family: \'Times New Roman\', Times, serif; font-size: 14px; border-bottom: 1px solid var(--border-color);">{value}</td>'
         html += '</tr>'
     html += '</tbody>'
     html += '</table>'
@@ -671,7 +671,7 @@ def render_styled_table_html(df, title="", header_style="gradient", row_alternat
     else:
         header_bg = "#ffffff"
     
-    html = f'<div style="margin: 24px 0; padding: 20px; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; overflow-x: auto;">'
+    html = f'<div style="margin: 24px 0; padding: 20px; background: var(--card-bg); border-radius: 14px; box-shadow: 0 4px 16px var(--kpi-shadow); border: 1px solid var(--border-color); overflow-x: auto;">'
     
     if title:
         html += f'<h4 style="margin: 0 0 16px 0; color: #1a1a2e; font-weight: 700; font-size: 16px;">{title}</h4>'
@@ -679,9 +679,9 @@ def render_styled_table_html(df, title="", header_style="gradient", row_alternat
     html += '<table style="width: 100%; border-collapse: collapse; font-family: \'Times New Roman\', Times, serif;">'
     
     # Header
-    html += f'<tr style="background: {header_bg}; border-bottom: 2px solid #e2e8f0;">'
+    html += f'<tr style="background: var(--input-bg); border-bottom: 2px solid var(--border-color);">'
     for col in df.columns:
-        html += f'<th style="padding: 14px 16px; text-align: left; font-weight: 700; color: #475569; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">{col}</th>'
+        html += f'<th style="padding: 14px 16px; text-align: left; font-weight: 700; color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">{col}</th>'
     html += '</tr>'
     
     # Body
@@ -695,7 +695,7 @@ def render_styled_table_html(df, title="", header_style="gradient", row_alternat
                 align = "right"
             else:
                 align = "left"
-            html += f'<td style="padding: 12px 16px; text-align: {align}; color: #1a1a2e; font-size: 14px;">{value}</td>'
+            html += f'<td style="padding: 12px 16px; text-align: {align}; color: var(--text-main); font-size: 14px;">{value}</td>'
         html += '</tr>'
     html += '</tbody>'
     html += '</table>'
@@ -703,36 +703,45 @@ def render_styled_table_html(df, title="", header_style="gradient", row_alternat
     
     return html
 
+# ── Theme Variable Logic ──
+is_dark = st.session_state.get("theme", "dark") == "dark"
+theme_vars = {
+    "bg_color": "#0f172a" if is_dark else "#f4f6fa",
+    "card_bg": "#1e293b" if is_dark else "#ffffff",
+    "text_main": "#f8fafc" if is_dark else "#1a1a2e",
+    "text_muted": "#94a3b8" if is_dark else "#64748b",
+    "border_color": "#334155" if is_dark else "#f1f5f9",
+    "s_bg1": "#020617" if is_dark else "#5b21b6",
+    "s_bg2": "#1e1b4b" if is_dark else "#7c3aed",
+    "kpi_shadow": "rgba(0,0,0,0.3)" if is_dark else "rgba(0,0,0,0.08)",
+    "input_bg": "#0f172a" if is_dark else "#f8fafc"
+}
+
 st.markdown(
-    """
+    f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-    /* ── Theme Variables ── */
-    :root {
-        --bg-color: #f4f6fa;
-        --card-bg: #ffffff;
-        --text-main: #1a1a2e;
-        --text-muted: #64748b;
-        --border-color: #f1f5f9;
-        --sidebar-bg-1: #5b21b6;
-        --sidebar-bg-2: #7c3aed;
-        --kpi-shadow: rgba(0,0,0,0.08);
-        --input-bg: #f8fafc;
-    }
-    
-    [data-theme="dark"] {
-        --bg-color: #0f172a;
-        --card-bg: #1e293b;
-        --text-main: #f8fafc;
-        --text-muted: #94a3b8;
-        --border-color: #334155;
-        --sidebar-bg-1: #020617;
-        --sidebar-bg-2: #1e1b4b;
-        --kpi-shadow: rgba(0,0,0,0.3);
-        --input-bg: #0f172a;
-    }
+    /* ── Theme Variables (Dynamic) ── */
+    :root {{
+        --bg-color: {theme_vars['bg_color']};
+        --card-bg: {theme_vars['card_bg']};
+        --text-main: {theme_vars['text_main']};
+        --text-muted: {theme_vars['text_muted']};
+        --border-color: {theme_vars['border_color']};
+        --sidebar-bg-1: {theme_vars['s_bg1']};
+        --sidebar-bg-2: {theme_vars['s_bg2']};
+        --kpi-shadow: {theme_vars['kpi_shadow']};
+        --input-bg: {theme_vars['input_bg']};
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
+st.markdown(
+    """
+    <style>
     /* ── Page background ── */
     .stApp {
         background: var(--bg-color) !important;
@@ -788,6 +797,42 @@ st.markdown(
         background: rgba(0,0,0,0.1) !important;
         border-radius: 12px !important;
         border: 1px solid rgba(255,255,255,0.08) !important;
+    }
+    section[data-testid="stSidebar"] .stButton > button {
+        background: rgba(255,255,255,0.15) !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+        box-shadow: none !important;
+    }
+    section[data-testid="stSidebar"] .stButton > button:hover {
+        background: rgba(255,255,255,0.25) !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    .user-badge-container {
+        background: rgba(255,255,255,0.15) !important;
+        border-radius: 12px !important;
+        padding: 12px 14px !important;
+        margin-bottom: 4px !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+    }
+    .user-badge-container * {
+        color: #ffffff !important;
+    }
+    .user-badge-name {
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.5px !important;
+        color: #ffffff !important;
+    }
+    .user-badge-role {
+        margin-top: 6px !important;
+        display: inline-block !important;
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        padding: 4px 12px !important;
+        border-radius: 999px !important;
+        letter-spacing: 0.5px !important;
+        color: #ffffff !important;
     }
 
     /* ── Cards ── */
@@ -912,9 +957,8 @@ st.markdown(
 
     /* ── Metrics ── */
     div[data-testid="stMetricValue"] {
-        font-family: 'Times New Roman', Times, serif !important;
         font-weight: 800 !important;
-        color: #0f172a !important;
+        color: var(--text-main) !important;
         font-size: 1.8rem !important;
         letter-spacing: -0.5px !important;
     }
@@ -1005,9 +1049,9 @@ st.markdown(
         letter-spacing: 0.5px !important;
         box-shadow: 0 2px 6px rgba(0,0,0,0.04) !important;
     }
-    .badge.green { background: #ecfdf5 !important; color: #059669 !important; border: 1px solid #d1fae5 !important;}
-    .badge.yellow { background: #fffbeb !important; color: #d97706 !important; border: 1px solid #fef3c7 !important;}
-    .badge.red { background: #fef2f2 !important; color: #dc2626 !important; border: 1px solid #fee2e2 !important;}
+    .badge.green { background: rgba(16, 185, 129, 0.1) !important; color: #10b981 !important; border: 1px solid rgba(16, 185, 129, 0.3) !important;}
+    .badge.yellow { background: rgba(245, 158, 11, 0.1) !important; color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.3) !important;}
+    .badge.red { background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; border: 1px solid rgba(239, 68, 68, 0.3) !important;}
 
     /* ── Progress bar ── */
     .stProgress > div > div { background: linear-gradient(90deg, #7c3aed, #ec4899) !important; border-radius: 999px !important; }
@@ -1086,19 +1130,174 @@ st.markdown(
 if "theme" not in st.session_state:
     st.session_state.theme = "light"
 
-# Inject JS to apply data-theme attribute to root
-st.components.v1.html(
-    f"""
-    <script>
-    const set_theme = () => {{
-        window.parent.document.documentElement.setAttribute('data-theme', '{st.session_state.theme}');
-    }}
-    set_theme();
-    </script>
-    """,
-    height=0,
-    width=0,
-)
+# ── Reliable theme: inject CSS variables directly from Python (no JS needed) ──
+if st.session_state.theme == "dark":
+    st.markdown(
+        """
+        <style>
+        /* ── DARK MODE: CSS variable overrides ── */
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --sidebar-bg-1: #020617;
+            --sidebar-bg-2: #1e1b4b;
+            --kpi-shadow: rgba(0,0,0,0.3);
+            --input-bg: #0f172a;
+        }
+        /* Main backgrounds */
+        .stApp, [data-testid="stAppViewContainer"], .block-container {
+            background-color: #0f172a !important;
+        }
+        /* Main content text — targeted, does NOT touch sidebar or inline-styled elements */
+        [data-testid="stMainBlockContainer"] p,
+        [data-testid="stMainBlockContainer"] span:not([class*="logo"]):not([class*="badge"]),
+        [data-testid="stMainBlockContainer"] label,
+        [data-testid="stMarkdownContainer"] > p,
+        [data-testid="stMarkdownContainer"] > span,
+        .stMarkdown p, .stMarkdown span, .stMarkdown label,
+        .element-container p {
+            color: #f8fafc !important;
+        }
+        /* Headings in main content */
+        [data-testid="stMainBlockContainer"] h1,
+        [data-testid="stMainBlockContainer"] h2,
+        [data-testid="stMainBlockContainer"] h3,
+        [data-testid="stMainBlockContainer"] h4 { color: #f8fafc !important; }
+        /* Inputs */
+        div[data-baseweb="input"] > div,
+        div[data-baseweb="base-input"] > div,
+        div[data-baseweb="select"] > div {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        div[data-baseweb="input"] input,
+        div[data-baseweb="base-input"] input {
+            color: #f8fafc !important;
+            background: transparent !important;
+        }
+        /* Selectbox dropdown popup — all portals */
+        [data-baseweb="popover"],
+        [data-baseweb="popover"] > div,
+        [data-baseweb="menu"],
+        [role="listbox"] {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        [role="option"] {
+            background-color: #1e293b !important;
+            color: #f8fafc !important;
+        }
+        [role="option"]:hover,
+        [role="option"][aria-selected="true"] {
+            background-color: #334155 !important;
+        }
+        /* ── HTML tables (render_professional_table & inline HTML) ── */
+        [data-testid="stMarkdownContainer"] table,
+        [data-testid="stMarkdownContainer"] table thead,
+        [data-testid="stMarkdownContainer"] table tbody,
+        [data-testid="stMarkdownContainer"] table tr {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        [data-testid="stMarkdownContainer"] table td {
+            background-color: #1e293b !important;
+            color: #f8fafc !important;
+            border-color: #334155 !important;
+        }
+        [data-testid="stMarkdownContainer"] table th {
+            background-color: #0f172a !important;
+            color: #94a3b8 !important;
+            border-color: #334155 !important;
+        }
+        /* override inline white backgrounds inside markdown divs */
+        [data-testid="stMarkdownContainer"] div {
+            background-color: transparent;
+        }
+        [data-testid="stMarkdownContainer"] div[style*="background"] {
+            background-color: #1e293b !important;
+            background: #1e293b !important;
+        }
+        /* Streamlit stDataFrame */
+        .stDataFrame table, .stTable table { background: #1e293b !important; }
+        .stDataFrame table th, .stTable table th {
+            background: #0f172a !important; color: #94a3b8 !important;
+        }
+        .stDataFrame table td, .stTable table td {
+            color: #f8fafc !important; border-bottom-color: #334155 !important;
+        }
+        /* Cards */
+        .dashboard-card, .stock-info, .category-card {
+            background: #1e293b !important; border-color: #334155 !important;
+        }
+        /* Tabs */
+        .stTabs [data-baseweb="tab-list"] { background: #1e293b !important; }
+        .stTabs [aria-selected="true"] { background: #0f172a !important; color: #f8fafc !important; }
+        .stTabs [data-baseweb="tab"] { color: #94a3b8 !important; }
+        /* Expanders */
+        .stExpander { background: #1e293b !important; border-color: #334155 !important; }
+        /* Alerts */
+        div[data-testid="stAlert"] { background: #1e293b !important; }
+        /* Metrics */
+        div[data-testid="stMetricValue"] { color: #f8fafc !important; }
+        div[data-testid="stMetricLabel"] { color: #94a3b8 !important; }
+        /* Header */
+        header[data-testid="stHeader"] { background: #0f172a !important; }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+else:
+    # Light mode — restore clean light defaults
+    st.markdown(
+        """
+        <style>
+        :root {
+            --bg-color: #f4f6fa;
+            --card-bg: #ffffff;
+            --text-main: #1a1a2e;
+            --text-muted: #64748b;
+            --border-color: #f1f5f9;
+            --sidebar-bg-1: #5b21b6;
+            --sidebar-bg-2: #7c3aed;
+            --kpi-shadow: rgba(0,0,0,0.08);
+            --input-bg: #f8fafc;
+        }
+        .stApp, [data-testid="stAppViewContainer"], .block-container {
+            background-color: #f4f6fa !important;
+        }
+        /* Inputs */
+        div[data-baseweb="input"] > div,
+        div[data-baseweb="base-input"] > div,
+        div[data-baseweb="select"] > div {
+            background: #f8fafc !important; border-color: #f1f5f9 !important;
+        }
+        div[data-baseweb="input"] input,
+        div[data-baseweb="base-input"] input { color: #1a1a2e !important; }
+        /* Dropdown popup */
+        [data-baseweb="popover"], [role="listbox"] {
+            background-color: #ffffff !important; border-color: #e2e8f0 !important;
+        }
+        [role="option"] { background-color: #ffffff !important; color: #1a1a2e !important; }
+        [role="option"]:hover { background-color: #f1f5f9 !important; }
+        /* Tabs */
+        .stTabs [data-baseweb="tab-list"] { background: #f1f5f9 !important; }
+        .stTabs [aria-selected="true"] { background: #ffffff !important; color: #1a1a2e !important; }
+        header[data-testid="stHeader"] { background: #f4f6fa !important; }
+        .stExpander { background: #ffffff !important; border-color: #f1f5f9 !important; }
+        div[data-testid="stMetricValue"] { color: #0f172a !important; }
+        div[data-testid="stMetricLabel"] { color: #64748b !important; }
+        /* Light mode: force HTML tables white */
+        [data-testid="stMarkdownContainer"] table td { background-color: #ffffff !important; color: #1a1a2e !important; }
+        [data-testid="stMarkdownContainer"] table th { background-color: #f8fafc !important; color: #475569 !important; }
+        [data-testid="stMarkdownContainer"] div[style*="background"] { background-color: #ffffff !important; background: #ffffff !important; }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
 
 st.sidebar.markdown(
     """
@@ -1143,7 +1342,7 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-nav_items = ["Dashboard", "Inventory", "Stockouts & Lost Sales", "Management", "Pricing", "Reports"]
+nav_items = ["Dashboard", "Inventory", "Stockouts & Lost Sales", "AI Decision Support", "Management", "Pricing", "Reports"]
 if st.session_state.get("role") == "super_admin":
     nav_items.append("User Management")
 
@@ -1159,7 +1358,20 @@ if st.sidebar.button(f"🌙 Toggle {'Light' if st.session_state.theme == 'dark' 
     st.session_state.theme = "light" if st.session_state.theme == "dark" else "dark"
     st.rerun()
 
-st.sidebar.caption("Dashboard User")
+# ── Sidebar user info badge ──
+_role_disp = st.session_state.get("role", "User")
+_uname_disp = st.session_state.get("username", "User")
+_role_badge_color = "#f59e0b" if _role_disp == "super_admin" else ("rgba(255,255,255,0.3)" if _role_disp == "Admin" else "#10b981")
+_role_label = "⭐ Super Admin" if _role_disp == "super_admin" else ("🛡 Admin" if _role_disp == "Admin" else "👤 User")
+st.sidebar.markdown(
+    f"""
+    <div class='user-badge-container'>
+      <div class='user-badge-name'>{''.join(c[0].upper() for c in _uname_disp.split()[:2])} &nbsp;{_uname_disp}</div>
+      <div class='user-badge-role' style='background:{_role_badge_color} !important;'>{_role_label}</div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 st.sidebar.markdown("---")
 if st.sidebar.button("🚪 Logout", key="logout_btn"):
@@ -1215,7 +1427,7 @@ st.markdown(
     <style>
     /* Maximize space for an 'App' feeling (especially online) */
     .block-container { max-width: 100% !important; width: 100% !important; padding: 1rem 3rem !important; }
-    .stApp { min-width: unset !important; background-color: #f8fafc !important; }
+    .stApp { min-width: unset !important; }
     header[data-testid="stHeader"] { height: 3rem !important; }
     footer { visibility: hidden !important; }
     
@@ -1469,10 +1681,10 @@ if menu == "Dashboard":
             stock_label = "🟢 In Stock" if stock_val > 20 else "🔴 Low Stock"
             st.markdown(
                 f"""
-                <div style='padding:24px; border-radius:18px; background:white; border:1px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.03); text-align:center;'>
-                    <div style='color:#64748b; font-size:12px; font-weight:700; text-transform:uppercase; margin-bottom:8px;'>Top Performer</div>
-                    <div style='color:#1a1a2e; font-size:18px; font-weight:800; margin-bottom:12px;'>{row['product_name']}</div>
-                    <div style='color:#475569; font-size:15px; font-weight:600; margin-bottom:12px;'>{int(row['monthly_sales'])} sold/mo</div>
+                <div style='padding:24px; border-radius:18px; background:var(--card-bg); border:1px solid var(--border-color); box-shadow: 0 4px 12px var(--kpi-shadow); text-align:center;'>
+                    <div style='color:var(--text-muted); font-size:12px; font-weight:700; text-transform:uppercase; margin-bottom:8px;'>Top Performer</div>
+                    <div style='color:var(--text-main); font-size:18px; font-weight:800; margin-bottom:12px;'>{row['product_name']}</div>
+                    <div style='color:var(--text-main); font-size:15px; font-weight:600; margin-bottom:12px;'>{int(row['monthly_sales'])} sold/mo</div>
                     <div style='color:#2563eb; font-weight:700;'>{stock_label}</div>
                 </div>
                 """,
@@ -1501,27 +1713,27 @@ if menu == "Dashboard":
             core_df = display_df[core_cols].copy()
             
             # Create professional HTML table with double-sticky header (Title + Columns)
-            demand_html = '<div style="margin: 32px 0; padding: 0; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; overflow-x: auto; max-height: 520px; overflow-y: auto; position: relative;">'
+            demand_html = '<div style="margin: 32px 0; padding: 0; background: var(--card-bg); border-radius: 14px; box-shadow: 0 4px 16px var(--kpi-shadow); border: 1px solid var(--border-color); overflow-x: auto; max-height: 520px; overflow-y: auto; position: relative;">'
             
             # 1. Sticky Title
-            demand_html += '<div style="position: sticky; top: 0; background: white; z-index: 20; padding: 24px 28px 10px 28px; border-bottom: 1px solid #f1f5f9;">'
-            demand_html += '<h4 style="margin: 0; color: #1a1a2e; font-weight: 700; font-size: 18px; font-family: \'Times New Roman\', Times, serif;">Demand Pattern Classification</h4>'
+            demand_html += '<div style="position: sticky; top: 0; background: var(--card-bg); z-index: 20; padding: 24px 28px 10px 28px; border-bottom: 1px solid var(--border-color);">'
+            demand_html += f'<h4 style="margin: 0; color: var(--text-main); font-weight: 700; font-size: 18px; font-family: \'Times New Roman\', Times, serif;">Demand Pattern Classification</h4>'
             demand_html += '</div>'
             
             demand_html += '<table style="width: 100%; border-collapse: collapse; font-family: \'Times New Roman\', Times, serif;">'
             
             # 2. Sticky Table Header
-            demand_html += '<thead><tr style="background: #f8fafc;">'
+            demand_html += f'<thead><tr style="background: var(--input-bg);">'
             for col in core_cols:
-                demand_html += f'<th style="position: sticky; top: 60px; background: #f8fafc; z-index: 10; padding: 18px 28px; text-align: left; font-weight: 700; color: #475569; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0;">{col}</th>'
+                demand_html += f'<th style="position: sticky; top: 60px; background: var(--input-bg); z-index: 10; padding: 18px 28px; text-align: left; font-weight: 700; color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border-color);">{col}</th>'
             demand_html += '</tr></thead>'
             
             demand_html += '<tbody>'
             for idx, row in core_df.iterrows():
-                demand_html += '<tr style="border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s;">'
+                demand_html += '<tr style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;">'
                 for col in core_cols:
                     value = row[col]
-                    demand_html += f'<td style="padding: 16px 28px; text-align: left; color: #1a1a2e; font-size: 15px;">{value}</td>'
+                    demand_html += f'<td style="padding: 16px 28px; text-align: left; color: var(--text-main); font-size: 15px;">{value}</td>'
                 demand_html += '</tr>'
             demand_html += '</tbody></table>'
             demand_html += '</div>'
@@ -2327,19 +2539,19 @@ elif menu == "Stockouts & Lost Sales":
         acct_display = acct.rename(columns={"reason":"Reason","category":"Department","stock_outs":"#Stock Outs","lost_revenue":"Total Sales Lost","%StockOut":"%Stock Out","%LostSales":"%Lost Sales"})
         acct_display["Total Sales Lost"] = acct_display["Total Sales Lost"].apply(lambda x: f"₹{x:,.0f}")
         
-        acct_html = '<div style="margin: 32px 0; padding: 28px; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; overflow-x: auto;">' 
-        acct_html += '<h4 style="margin: 0 0 20px 0; color: #1a1a2e; font-weight: 700; font-size: 18px; font-family: \'Times New Roman\', Times, serif;">Lost Sales Accountability</h4>'
+        acct_html = '<div style="margin: 32px 0; padding: 28px; background: var(--card-bg); border-radius: 14px; box-shadow: 0 4px 16px var(--kpi-shadow); border: 1px solid var(--border-color); overflow-x: auto;">' 
+        acct_html += '<h4 style="margin: 0 0 20px 0; color: var(--text-main); font-weight: 700; font-size: 18px; font-family: \'Times New Roman\', Times, serif;">Lost Sales Accountability</h4>'
         acct_html += '<table style="width: 100%; border-collapse: collapse; font-family: \'Times New Roman\', Times, serif;">'
-        acct_html += '<tr style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 2px solid #e2e8f0;">'
+        acct_html += '<tr style="background: var(--input-bg); border-bottom: 2px solid var(--border-color);">'
         for col in acct_display.columns:
-            acct_html += f'<th style="padding: 18px 20px; text-align: left; font-weight: 700; color: #475569; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">{col}</th>'
+            acct_html += f'<th style="padding: 18px 20px; text-align: left; font-weight: 700; color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">{col}</th>'
         acct_html += '</tr>'
         for idx, row in acct_display.iterrows():
-            acct_html += '<tr style="border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s;">'
+            acct_html += '<tr style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;">'
             for col in acct_display.columns:
                 value = row[col]
                 align = 'right' if col in ['#Stock Outs', 'Total Sales Lost', '%Stock Out', '%Lost Sales'] else 'left'
-                acct_html += f'<td style="padding: 16px 20px; text-align: {align}; color: #1a1a2e; font-size: 15px;">{value}</td>'
+                acct_html += f'<td style="padding: 16px 20px; text-align: {align}; color: var(--text-main); font-size: 15px;">{value}</td>'
             acct_html += '</tr>'
         acct_html += '</table></div>'
         st.markdown(acct_html, unsafe_allow_html=True)
@@ -2399,19 +2611,19 @@ elif menu == "Stockouts & Lost Sales":
             "lost_sales_pct": "% Lost Sales"
         })
         
-        cat_html = '<div style="margin: 32px 0; padding: 28px; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; overflow-x: auto;">'
-        cat_html += '<h4 style="margin: 0 0 20px 0; color: #1a1a2e; font-weight: 700; font-size: 18px; font-family: \'Times New Roman\', Times, serif;">Category-wise Lost Sales Summary</h4>'
+        cat_html = '<div style="margin: 32px 0; padding: 28px; background: var(--card-bg); border-radius: 14px; box-shadow: 0 4px 16px var(--kpi-shadow); border: 1px solid var(--border-color); overflow-x: auto;">'
+        cat_html += '<h4 style="margin: 0 0 20px 0; color: var(--text-main); font-weight: 700; font-size: 18px; font-family: \'Times New Roman\', Times, serif;">Category-wise Lost Sales Summary</h4>'
         cat_html += '<table style="width: 100%; border-collapse: collapse; font-family: \'Times New Roman\', Times, serif;">'
-        cat_html += '<tr style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 2px solid #e2e8f0;">'
+        cat_html += '<tr style="background: var(--input-bg); border-bottom: 2px solid var(--border-color);">'
         for col in cat_display.columns:
-            cat_html += f'<th style="padding: 18px 20px; text-align: left; font-weight: 700; color: #475569; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">{col}</th>'
+            cat_html += f'<th style="padding: 18px 20px; text-align: left; font-weight: 700; color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">{col}</th>'
         cat_html += '</tr>'
         for idx, row in cat_display.iterrows():
-            cat_html += '<tr style="border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s;">'
+            cat_html += '<tr style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;">'
             for col in cat_display.columns:
                 value = row[col]
                 align = 'right' if col in ['Total Products', 'Lost Sales', 'Stock Outs', '% Lost Sales'] else 'left'
-                cat_html += f'<td style="padding: 16px 20px; text-align: {align}; color: #1a1a2e; font-size: 15px;">{value}</td>'
+                cat_html += f'<td style="padding: 16px 20px; text-align: {align}; color: var(--text-main); font-size: 15px;">{value}</td>'
             cat_html += '</tr>'
         cat_html += '</table></div>'
         st.markdown(cat_html, unsafe_allow_html=True)
@@ -2436,19 +2648,19 @@ elif menu == "Stockouts & Lost Sales":
         })
         details_display["Lost Revenue"] = details_display["Lost Revenue"].apply(lambda x: f"₹{x:,.0f}")
         
-        details_html = '<div style="margin: 32px 0; padding: 28px; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; overflow-x: auto; overflow-y: auto; max-height: 420px;">'
-        details_html += '<h4 style="margin: 0 0 20px 0; color: #1a1a2e; font-weight: 700; font-size: 18px; font-family: \'Times New Roman\', Times, serif;">Stock Out Details</h4>'
+        details_html = '<div style="margin: 32px 0; padding: 28px; background: var(--card-bg); border-radius: 14px; box-shadow: 0 4px 16px var(--kpi-shadow); border: 1px solid var(--border-color); overflow-x: auto; overflow-y: auto; max-height: 420px;">'
+        details_html += '<h4 style="margin: 0 0 20px 0; color: var(--text-main); font-weight: 700; font-size: 18px; font-family: \'Times New Roman\', Times, serif;">Stock Out Details</h4>'
         details_html += '<table style="width: 100%; border-collapse: collapse; font-family: \'Times New Roman\', Times, serif;">'
-        details_html += '<tr style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 2px solid #e2e8f0;">'
+        details_html += '<tr style="background: var(--input-bg); border-bottom: 2px solid var(--border-color);">'
         for col in details_display.columns:
-            details_html += f'<th style="padding: 18px 20px; text-align: left; font-weight: 700; color: #475569; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">{col}</th>'
+            details_html += f'<th style="padding: 18px 20px; text-align: left; font-weight: 700; color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">{col}</th>'
         details_html += '</tr>'
         for idx, row in details_display.iterrows():
-            details_html += '<tr style="border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s;">'
+            details_html += '<tr style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;">'
             for col in details_display.columns:
                 value = row[col]
                 align = 'right' if col in ['Product ID', 'Days Stockout', 'Avg Daily Sales', 'Predicted Stock', 'Rec. Reorder', 'Lost Units', 'Lost Revenue'] else 'left'
-                details_html += f'<td style="padding: 16px 20px; text-align: {align}; color: #1a1a2e; font-size: 15px;">{value}</td>'
+                details_html += f'<td style="padding: 16px 20px; text-align: {align}; color: var(--text-main); font-size: 15px;">{value}</td>'
             details_html += '</tr>'
         details_html += '</table></div>'
         st.markdown(details_html, unsafe_allow_html=True)
@@ -3303,6 +3515,265 @@ elif menu == "Pricing":
     else:
         st.info("Select products to preview pricing changes.")
 
+# ---------------- AI DECISION SUPPORT PAGE ----------------
+elif menu == "AI Decision Support":
+    st.markdown("<h2 style='margin:0 0 4px 0'>🤖 AI Decision Support</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#64748b;margin-top:-4px;margin-bottom:24px;'>AI-powered recommendations, risk analysis, and pricing simulations across your entire inventory.</p>", unsafe_allow_html=True)
+
+    ai_tab1, ai_tab2, ai_tab3 = st.tabs(["💡 Recommendations", "⚠️ Risk Heatmap", "📊 Pricing Simulation"])
+
+    # ── TAB 1: RECOMMENDATIONS ──
+    with ai_tab1:
+        st.markdown("### AI Recommendations")
+        st.caption("Automatically generated actionable insights for your product catalog.")
+
+        try:
+            with st.spinner("Generating recommendations..."):
+                rec_df = ai_service.bulk_recommendations(df)
+
+            if rec_df.empty:
+                st.info("✅ All products are in good shape — no critical actions needed right now.")
+            else:
+                # Summary KPIs
+                rk1, rk2, rk3, rk4 = st.columns(4)
+                rk1.metric("Total Recommendations", len(rec_df))
+                rk2.metric("High Confidence (≥80%)", int((rec_df["confidence"] >= 0.8).sum()))
+                rk3.metric("Products Flagged", rec_df["product"].nunique())
+                rk4.metric("Top Action", rec_df["suggestion"].mode().iloc[0] if not rec_df.empty else "—")
+
+                st.markdown("<br>", unsafe_allow_html=True)
+
+                # Filter controls
+                filter_col1, filter_col2 = st.columns(2)
+                with filter_col1:
+                    action_filter = st.multiselect(
+                        "Filter by Action",
+                        options=sorted(rec_df["suggestion"].unique()),
+                        default=sorted(rec_df["suggestion"].unique()),
+                        key="ai_action_filter"
+                    )
+                with filter_col2:
+                    min_conf = st.slider("Min. Confidence", 0.0, 1.0, 0.0, 0.05, key="ai_conf_slider")
+
+                filtered = rec_df[
+                    (rec_df["suggestion"].isin(action_filter)) &
+                    (rec_df["confidence"] >= min_conf)
+                ].copy()
+
+                if filtered.empty:
+                    st.info("No recommendations match the current filters.")
+                else:
+                    # Color-coded badge per action
+                    def _badge(action):
+                        colors = {
+                            "Increase reorder": ("#dbeafe", "#1d4ed8"),
+                            "Apply discount":   ("#fef3c7", "#d97706"),
+                            "Increase price":   ("#dcfce7", "#15803d"),
+                            "Improve product quality": ("#fce7f3", "#be185d"),
+                        }
+                        bg, fg = colors.get(action, ("#f1f5f9", "#475569"))
+                        return f"<span style='background:{bg};color:{fg};padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;'>{action}</span>"
+
+                    def _conf_bar(c):
+                        pct = int(c * 100)
+                        clr = "#10b981" if pct >= 80 else ("#f59e0b" if pct >= 60 else "#ef4444")
+                        return f"<div style='background:var(--input-bg);border-radius:999px;height:8px;width:100px;display:inline-block;vertical-align:middle'><div style='background:{clr};border-radius:999px;height:8px;width:{pct}px'></div></div> <span style='font-size:12px;color:var(--text-muted)'>{pct}%</span>"
+
+                    rows_html = ""
+                    for _, row in filtered.iterrows():
+                        rows_html += f"""
+                        <tr style='border-bottom:1px solid var(--border-color);'>
+                            <td style='padding:12px 16px;font-weight:600;color:var(--text-main);font-size:14px;'>{row['product']}</td>
+                            <td style='padding:12px 16px;color:var(--text-muted);font-size:13px;'>{row['situation']}</td>
+                            <td style='padding:12px 16px;'>{_badge(row['suggestion'])}</td>
+                            <td style='padding:12px 16px;'>{_conf_bar(row['confidence'])}</td>
+                            <td style='padding:12px 16px;color:var(--text-muted);font-size:12px;'>{row['reason']}</td>
+                        </tr>"""
+
+                    table_html = f"""
+                    <div style='overflow-x:auto;border-radius:14px;border:1px solid var(--border-color);box-shadow:0 4px 16px var(--kpi-shadow);'>
+                    <table style='width:100%;border-collapse:collapse;background:var(--card-bg);font-family:Times New Roman,serif;'>
+                        <thead>
+                        <tr style='background:var(--input-bg);border-bottom:2px solid var(--border-color);'>
+                            <th style='padding:14px 16px;text-align:left;font-size:12px;color:#475569;text-transform:uppercase;letter-spacing:0.5px;'>Product</th>
+                            <th style='padding:14px 16px;text-align:left;font-size:12px;color:#475569;text-transform:uppercase;letter-spacing:0.5px;'>Situation</th>
+                            <th style='padding:14px 16px;text-align:left;font-size:12px;color:#475569;text-transform:uppercase;letter-spacing:0.5px;'>Action</th>
+                            <th style='padding:14px 16px;text-align:left;font-size:12px;color:#475569;text-transform:uppercase;letter-spacing:0.5px;'>Confidence</th>
+                            <th style='padding:14px 16px;text-align:left;font-size:12px;color:#475569;text-transform:uppercase;letter-spacing:0.5px;'>Reason</th>
+                        </tr>
+                        </thead>
+                        <tbody>{rows_html}</tbody>
+                    </table></div>"""
+                    st.markdown(table_html, unsafe_allow_html=True)
+
+                    st.markdown("<br>", unsafe_allow_html=True)
+
+                    # One-click apply action
+                    st.markdown("#### ⚡ Apply Action")
+                    ac1, ac2, ac3 = st.columns([2, 2, 1])
+                    with ac1:
+                        apply_product = st.selectbox("Select product", filtered["product"].unique(), key="ai_apply_prod")
+                    with ac2:
+                        apply_suggestion = st.selectbox(
+                            "Select action",
+                            filtered[filtered["product"] == apply_product]["suggestion"].unique(),
+                            key="ai_apply_sugg"
+                        )
+                    with ac3:
+                        st.markdown("<br>", unsafe_allow_html=True)
+                        if st.button("Apply ✅", key="ai_apply_btn", use_container_width=True):
+                            with st.spinner("Applying..."):
+                                result = ai_service.apply_action(
+                                    apply_product,
+                                    apply_suggestion,
+                                    user=st.session_state.get("username", "webui")
+                                )
+                            if result.get("ok"):
+                                st.success(result["message"])
+                            else:
+                                st.error(result["message"])
+        except Exception as e:
+            st.error(f"Failed to generate recommendations: {e}")
+
+    # ── TAB 2: RISK HEATMAP ──
+    with ai_tab2:
+        st.markdown("### Inventory Risk Heatmap")
+        st.caption("Stockout and overstock risk scores per category, computed by the AI risk engine.")
+
+        try:
+            with st.spinner("Computing risk scores..."):
+                heat_df = ai_service.aggregate_risk_heatmap(df)
+
+            if heat_df.empty:
+                st.info("No risk data available.")
+            else:
+                # KPIs
+                h1, h2, h3 = st.columns(3)
+                h1.metric("Avg Risk Score", f"{heat_df['avg_risk_score'].mean():.1f} / 100")
+                critical_cats = heat_df[heat_df['avg_risk_score'] >= 65]
+                h2.metric("Critical Categories", len(critical_cats))
+                h3.metric("Categories Analysed", len(heat_df))
+
+                st.markdown("<br>", unsafe_allow_html=True)
+
+                # Risk bar chart
+                import plotly.express as px
+                heat_df_sorted = heat_df.sort_values("avg_risk_score", ascending=True)
+                fig_heat = px.bar(
+                    heat_df_sorted,
+                    x="avg_risk_score",
+                    y="category",
+                    orientation="h",
+                    color="avg_risk_score",
+                    color_continuous_scale=[[0,"#10b981"],[0.3,"#f59e0b"],[0.65,"#ef4444"],[1,"#7c3aed"]],
+                    range_color=[0, 100],
+                    text="avg_risk_score",
+                    labels={"avg_risk_score": "Avg Risk Score", "category": "Category"},
+                    title="Risk Score by Category"
+                )
+                fig_heat.update_traces(texttemplate='%{text:.1f}', textposition='outside')
+                fig_heat.update_layout(
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    font_family="Times New Roman",
+                    coloraxis_showscale=False,
+                    height=max(300, len(heat_df) * 45),
+                    margin=dict(l=0, r=0, t=40, b=0)
+                )
+                st.plotly_chart(fig_heat, use_container_width=True)
+
+                # Product-level risk table
+                st.markdown("#### Product-level Risk Detail")
+                prod_risk_rows = []
+                for _, row in df.iterrows():
+                    r = ai_service.predict_risk(row.to_dict())
+                    prod_risk_rows.append({
+                        "Product": row["product_name"],
+                        "Category": row.get("category", "—"),
+                        "Risk Score": r["risk_score"],
+                        "Label": r["label"],
+                        "Stockout Prob": f"{r['stockout_prob']*100:.1f}%",
+                        "Overstock Prob": f"{r['overstock_prob']*100:.1f}%",
+                    })
+                prod_risk_df = pd.DataFrame(prod_risk_rows).sort_values("Risk Score", ascending=False)
+
+                def _risk_label_style(label):
+                    if label == "Critical":
+                        return "🔴 Critical"
+                    elif label == "Warning":
+                        return "🟡 Warning"
+                    return "🟢 Safe"
+
+                prod_risk_df["Label"] = prod_risk_df["Label"].apply(_risk_label_style)
+                st.dataframe(prod_risk_df.reset_index(drop=True), use_container_width=True)
+
+        except Exception as e:
+            st.error(f"Failed to compute risk heatmap: {e}")
+
+    # ── TAB 3: PRICING SIMULATION ──
+    with ai_tab3:
+        st.markdown("### Catalog-Wide Pricing Simulation")
+        st.caption("Simulate the revenue and profit impact of applying a discount or price change across the entire catalog.")
+
+        sim_c1, sim_c2 = st.columns(2)
+        with sim_c1:
+            sim_discount = st.slider("Discount (%)", 0.0, 50.0, 0.0, 1.0, key="ai_sim_discount")
+        with sim_c2:
+            sim_price_chg = st.slider("Price change (%)", -30.0, 30.0, 0.0, 1.0, key="ai_sim_price")
+
+        if st.button("▶ Run Simulation", key="ai_sim_run", use_container_width=True):
+            try:
+                with st.spinner("Running AI pricing simulation..."):
+                    sim_result = ai_service.simulate_catalog_scenario(df, discount_pct=sim_discount, price_change_pct=sim_price_chg)
+
+                total_base_rev = sim_result["base_revenue"].sum()
+                total_new_rev  = sim_result["new_revenue"].sum()
+                total_base_pft = sim_result["base_profit"].sum()
+                total_new_pft  = sim_result["new_profit"].sum()
+
+                s1, s2, s3, s4 = st.columns(4)
+                s1.metric("Base Revenue",  f"₹{total_base_rev:,.0f}")
+                s2.metric("Simulated Revenue", f"₹{total_new_rev:,.0f}", delta=f"₹{total_new_rev - total_base_rev:+,.0f}")
+                s3.metric("Base Profit",    f"₹{total_base_pft:,.0f}")
+                s4.metric("Simulated Profit",  f"₹{total_new_pft:,.0f}", delta=f"₹{total_new_pft - total_base_pft:+,.0f}")
+
+                st.markdown("<br>", unsafe_allow_html=True)
+
+                # Category summary chart
+                cat_sim = sim_result.groupby("category", as_index=False).agg(
+                    base_revenue=("base_revenue", "sum"),
+                    new_revenue=("new_revenue", "sum")
+                )
+                fig_sim = px.bar(
+                    cat_sim,
+                    x="category",
+                    y=["base_revenue", "new_revenue"],
+                    barmode="group",
+                    labels={"value": "Revenue (₹)", "category": "Category", "variable": "Scenario"},
+                    title="Revenue: Baseline vs Simulated",
+                    color_discrete_sequence=["#cbd5e1", "#7c3aed"]
+                )
+                fig_sim.update_layout(
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    font_family="Times New Roman",
+                    margin=dict(l=0, r=0, t=40, b=0)
+                )
+                st.plotly_chart(fig_sim, use_container_width=True)
+
+                # Product-level simulation table
+                display_sim = sim_result[["product_name", "category", "base_revenue", "new_revenue", "delta_revenue", "base_profit", "new_profit", "delta_profit"]].copy()
+                for col in ["base_revenue", "new_revenue", "delta_revenue", "base_profit", "new_profit", "delta_profit"]:
+                    display_sim[col] = display_sim[col].apply(lambda x: f"₹{x:,.0f}")
+                display_sim.columns = ["Product", "Category", "Base Rev", "Sim Rev", "Δ Revenue", "Base Profit", "Sim Profit", "Δ Profit"]
+                st.dataframe(display_sim.reset_index(drop=True), use_container_width=True)
+
+            except Exception as e:
+                st.error(f"Simulation failed: {e}")
+        else:
+            st.info("Adjust the sliders above and click **Run Simulation** to see the impact on revenue and profit.")
+
+
 # ---------------- REPORTS PAGE ----------------
 elif menu == "Reports":
     st.markdown("## 📊 Reports & Analytics")
@@ -3417,89 +3888,409 @@ elif menu == "Reports":
             else:
                 st.info("No price audit records found.")
 
-# ---------------- USER MANAGEMENT ----------------
+# ──────────────────────────────────────────────────────────────────
+# USER MANAGEMENT PAGE  (super_admin only)
+# ──────────────────────────────────────────────────────────────────
 elif menu == "User Management" and st.session_state.get("role") == "super_admin":
-    st.markdown("<h1>User Management 👥</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b; margin-top:-10px;'>Manage all system users, roles, and account status.</p>", unsafe_allow_html=True)
 
-    from backend.db import SessionLocal
-    from backend.models import User
-    
-    session = SessionLocal()
+    st.markdown(
+        """
+        <style>
+        .admin-hero {
+            background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 50%, #a855f7 100%);
+            border-radius: 20px;
+            padding: 32px 36px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 12px 40px rgba(124,58,237,0.35);
+            font-family: 'Times New Roman', Times, serif !important;
+        }
+        .admin-hero h1 { color: white !important; margin: 0 !important; font-size: 28px !important; font-family: 'Times New Roman', Times, serif !important; }
+        .admin-hero p  { color: rgba(255,255,255,0.8) !important; margin: 4px 0 0 0 !important; font-size: 14px !important; font-family: 'Times New Roman', Times, serif !important; }
+        
+        .admin-kpi {
+            background: var(--card-bg) !important;
+            border-radius: 16px;
+            padding: 20px 24px;
+            box-shadow: 0 4px 20px var(--kpi-shadow);
+            border: 1px solid var(--border-color);
+            text-align: center;
+            font-family: 'Times New Roman', Times, serif !important;
+        }
+        .admin-kpi .ak-val { font-size: 32px; font-weight: 800; color: var(--text-main); letter-spacing: -1px; font-family: 'Times New Roman', Times, serif !important; }
+        .admin-kpi .ak-lbl { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; font-family: 'Times New Roman', Times, serif !important; }
+        .admin-kpi .ak-ico { font-size: 24px; margin-bottom: 6px; }
+        
+        .sect-card {
+            background: var(--card-bg) !important;
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 4px 20px var(--kpi-shadow);
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+            font-family: 'Times New Roman', Times, serif !important;
+        }
+        .sect-card h3 { font-size: 17px !important; font-weight: 800 !important;
+                         color: var(--text-main) !important; margin: 0 0 16px 0 !important; font-family: 'Times New Roman', Times, serif !important; }
+        
+        .role-badge-sa  { background:#fef3c7; color:#b45309; padding:3px 10px;
+                          border-radius:999px; font-size:11px; font-weight:700; border:1px solid #fde68a; font-family: 'Times New Roman', Times, serif !important; }
+        .role-badge-ad  { background:#ede9fe; color:#6d28d9; padding:3px 10px;
+                          border-radius:999px; font-size:11px; font-weight:700; border:1px solid #ddd6fe; font-family: 'Times New Roman', Times, serif !important; }
+        .role-badge-us  { background:#f0fdf4; color:#166534; padding:3px 10px;
+                          border-radius:999px; font-size:11px; font-weight:700; border:1px solid #bbf7d0; font-family: 'Times New Roman', Times, serif !important; }
+        
+        .status-on  { color:#10b981; font-weight:700; font-family: 'Times New Roman', Times, serif !important; }
+        .status-off { color:#ef4444; font-weight:700; font-family: 'Times New Roman', Times, serif !important; }
+        
+        /* Ensure table text inside admin pages also uses Times New Roman */
+        .admin-table-container table { font-family: 'Times New Roman', Times, serif !important; }
+        </style>
+        """, unsafe_allow_html=True
+    )
+
+    # ── Hero banner ──
+    st.markdown(
+        """
+        <div class='admin-hero'>
+          <div style='font-size:48px;'>🛡️</div>
+          <div>
+            <h1>User Management</h1>
+            <p>Create, edit, assign roles and control every account in the system.</p>
+          </div>
+        </div>
+        """, unsafe_allow_html=True
+    )
+
+    from backend.db import SessionLocal as _SASL
+    from backend.models import User as _SAUser, Registration as _SAReg
+
+    _sa_session = _SASL()
+
     try:
-        users = session.query(User).order_by(User.created_at.desc()).all()
-        
-        # --- TOP KPIS FOR USER MANAGEMENT ---
-        ku1, ku2, ku3 = st.columns(3)
-        ku1.metric("Total Accounts", len(users))
-        ku2.metric("Active Users", len([u for u in users if u.is_active]))
-        ku3.metric("Super Admins", len([u for u in users if u.role == "super_admin"]))
-        
+        all_users = _sa_session.query(_SAUser).order_by(_SAUser.created_at.desc()).all()
+
+        # ── KPI row ──
+        total_u   = len(all_users)
+        active_u  = sum(1 for u in all_users if u.is_active)
+        inactive_u = total_u - active_u
+        admins_u  = sum(1 for u in all_users if u.role in ("super_admin", "Admin"))
+        normal_u  = total_u - admins_u
+
+        kc1, kc2, kc3, kc4 = st.columns(4)
+        for col, ico, val, lbl, clr in [
+            (kc1, "👥", total_u,    "Total Accounts",  "#7c3aed"),
+            (kc2, "🟢", active_u,   "Active",           "#10b981"),
+            (kc3, "🔴", inactive_u, "Inactive",         "#ef4444"),
+            (kc4, "⭐", admins_u,   "Admins / Superusers", "#f59e0b"),
+        ]:
+            col.markdown(
+                f"""<div class='admin-kpi'>
+                       <div class='ak-ico'>{ico}</div>
+                       <div class='ak-val' style='color:{clr}'>{val}</div>
+                       <div class='ak-lbl'>{lbl}</div>
+                     </div>""",
+                unsafe_allow_html=True
+            )
+
         st.markdown("<br>", unsafe_allow_html=True)
-        
-        # --- SEARCH & TABLE ---
-        user_list = []
-        for u in users:
-            user_list.append({
-                "Username": u.username,
-                "Email": u.email,
-                "Role": f"<b>{u.role}</b>" if u.role == "super_admin" else u.role,
-                "Status": "🟢 Active" if u.is_active else "🔴 Inactive",
-                "Joined": u.created_at.strftime("%b %d, %Y") if u.created_at else "N/A"
-            })
-        
-        df_users = pd.DataFrame(user_list)
-        
-        # Custom styles for the table
-        st.markdown(render_professional_table(df_users, columns_style={
-            'Role': {'align': 'center'},
-            'Status': {'align': 'center'}
-        }), unsafe_allow_html=True)
-        
-        st.markdown("<hr style='margin: 40px 0; opacity: 0.1;'>", unsafe_allow_html=True)
-        
-        # --- MANAGE ACTIONS ---
-        st.subheader("Manage Selection")
-        with st.container(border=True):
-            col_act1, col_act2 = st.columns([2, 1], gap="large")
-            
-            with col_act1:
-                target_user = st.selectbox("Select user to modify", options=[u.username for u in users], help="Select an account to edit its properties or role.")
-                selected_u = session.query(User).filter(User.username == target_user).first()
-                
-                if selected_u:
-                    sub_col1, sub_col2 = st.columns(2)
-                    with sub_col1:
-                        roles_list = ["User", "Admin", "super_admin"]
-                        current_role_idx = roles_list.index(selected_u.role) if selected_u.role in roles_list else 0
-                        new_role = st.selectbox("Update Role", options=roles_list, index=current_role_idx)
-                    with sub_col2:
-                        st.markdown("<br>", unsafe_allow_html=True)
-                        is_active = st.checkbox("Account is Active", value=selected_u.is_active, key=f"active_{selected_u.user_id}")
-                    
-                    if st.button("SAVE CHANGES", use_container_width=True, type="primary"):
-                        selected_u.role = new_role
-                        selected_u.is_active = is_active
-                        session.commit()
-                        st.success(f"Successfully updated configuration for {target_user}!")
-                        st.rerun()
-                        
-            with col_act2:
-                st.markdown("<p style='font-size:14px; font-weight:600; color:#ef4444;'>Danger Zone</p>", unsafe_allow_html=True)
-                if st.button("DELETE PERMANENTLY", use_container_width=True):
-                    if target_user == st.session_state.username:
-                        st.error("Security Lock: You cannot delete your own account while logged in.")
+
+        # ──────────────────────────────────────────────────
+        # TABS
+        # ──────────────────────────────────────────────────
+        tab_list, tab_edit, tab_create, tab_audit = st.tabs([
+            "📋  All Users",
+            "✏️  Edit / Role",
+            "➕  Create User",
+            "📜  Audit Log",
+        ])
+
+        # ── TAB 1: ALL USERS ──────────────────────────────
+        with tab_list:
+            st.markdown("<div class='sect-card'>", unsafe_allow_html=True)
+            st.markdown("<h3>User Directory</h3>", unsafe_allow_html=True)
+
+            # Search bar
+            search_term = st.text_input("🔍  Search by username or email", placeholder="Type to filter…", key="um_search")
+
+            # Role filter
+            role_filter = st.selectbox("Filter by Role", ["All", "User", "Admin", "super_admin"], key="um_role_filter")
+
+            # Build table rows
+            def _role_badge(r):
+                if r == "super_admin":   return "<span class='role-badge-sa'>⭐ Super Admin</span>"
+                elif r == "Admin":       return "<span class='role-badge-ad'>🛡 Admin</span>"
+                else:                    return "<span class='role-badge-us'>👤 User</span>"
+
+            rows_html = ""
+            count = 0
+            for u in all_users:
+                if search_term and search_term.lower() not in u.username.lower() and search_term.lower() not in (u.email or "").lower():
+                    continue
+                if role_filter != "All" and u.role != role_filter:
+                    continue
+                count += 1
+                joined = u.created_at.strftime("%b %d, %Y") if u.created_at else "—"
+                last   = u.last_login.strftime("%b %d, %Y %H:%M") if u.last_login else "Never"
+                status_cls  = "status-on"  if u.is_active else "status-off"
+                status_txt  = "● Active"   if u.is_active else "● Inactive"
+                rows_html += f"""
+                <tr style='border-bottom:1px solid var(--border-color)'>
+                  <td style='padding:12px 14px;font-weight:600;color:var(--text-main)'>{u.username}</td>
+                  <td style='padding:12px 14px;color:var(--text-muted)'>{u.email or '—'}</td>
+                  <td style='padding:12px 14px;text-align:center'>{_role_badge(u.role)}</td>
+                  <td style='padding:12px 14px;text-align:center' class='{status_cls}'>{status_txt}</td>
+                  <td style='padding:12px 14px;color:var(--text-muted);font-size:12px'>{joined}</td>
+                  <td style='padding:12px 14px;color:var(--text-muted);font-size:12px'>{last}</td>
+                </tr>"""
+
+            table_html = f"""
+            <table style='width:100%;border-collapse:collapse;font-family:"Times New Roman",serif;'>
+              <thead>
+                <tr style='background:var(--input-bg);border-bottom:2px solid var(--border-color)'>
+                  <th style='padding:12px 14px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)'>Username</th>
+                  <th style='padding:12px 14px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)'>Email</th>
+                  <th style='padding:12px 14px;text-align:center;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)'>Role</th>
+                  <th style='padding:12px 14px;text-align:center;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)'>Status</th>
+                  <th style='padding:12px 14px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)'>Joined</th>
+                  <th style='padding:12px 14px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)'>Last Login</th>
+                </tr>
+              </thead>
+              <tbody>{rows_html}</tbody>
+            </table>"""
+
+            st.markdown(f"<div class='admin-table-container'>{table_html}</div>", unsafe_allow_html=True)
+            if count == 0:
+                st.info("No users match your search/filter criteria.")
+            else:
+                st.caption(f"Showing {count} of {total_u} accounts")
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        # ── TAB 2: EDIT / ROLE ────────────────────────────
+        with tab_edit:
+            st.markdown("<div class='sect-card'>", unsafe_allow_html=True)
+            st.markdown("<h3>Edit Account</h3>", unsafe_allow_html=True)
+
+            usernames = [u.username for u in all_users]
+            edit_target = st.selectbox("Select account to edit", usernames, key="um_edit_sel")
+            edit_u = _sa_session.query(_SAUser).filter(_SAUser.username == edit_target).first()
+
+            if edit_u:
+                # Info row
+                info_c1, info_c2 = st.columns(2)
+                info_c1.info(f"**User ID:** `{edit_u.user_id}`  \n**Email:** {edit_u.email}")
+                info_c2.info(f"**Joined:** {edit_u.created_at.strftime('%b %d, %Y') if edit_u.created_at else 'N/A'}  \n**Last Login:** {edit_u.last_login.strftime('%b %d, %Y %H:%M') if edit_u.last_login else 'Never'}")
+
+                st.markdown("<br>", unsafe_allow_html=True)
+
+                ec1, ec2, ec3 = st.columns(3)
+                with ec1:
+                    roles_avail = ["User", "Admin", "super_admin"]
+                    cur_idx = roles_avail.index(edit_u.role) if edit_u.role in roles_avail else 0
+                    new_role_val = st.selectbox("Role", roles_avail, index=cur_idx, key="um_new_role",
+                                               help="super_admin gets the User Management page.")
+                with ec2:
+                    new_email_val = st.text_input("Email", value=edit_u.email or "", key="um_new_email")
+                with ec3:
+                    new_username_val = st.text_input("Username", value=edit_u.username, key="um_new_uname")
+
+                is_active_val = st.toggle("Account Active", value=edit_u.is_active, key="um_active_toggle",
+                                          help="Inactive users cannot log in.")
+
+                st.markdown("<br>", unsafe_allow_html=True)
+
+                save_c, del_c = st.columns([3, 1])
+                with save_c:
+                    if st.button("💾  SAVE CHANGES", use_container_width=True, type="primary", key="um_save"):
+                        # Prevent self-demotion from super_admin
+                        if edit_target == st.session_state.username and new_role_val != "super_admin":
+                            st.error("🔒 You cannot change your own role while logged in.")
+                        else:
+                            edit_u.role      = new_role_val
+                            edit_u.email     = new_email_val.strip()
+                            edit_u.username  = new_username_val.strip()
+                            edit_u.is_active = is_active_val
+                            _sa_session.commit()
+                            st.success(f"✅ Account **{edit_target}** updated successfully!")
+                            st.rerun()
+
+                with del_c:
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    with st.expander("🗑 Delete", expanded=False):
+                        st.warning("This action is **permanent** and cannot be undone.")
+                        confirm_del = st.text_input("Type the username to confirm", key="um_del_confirm")
+                        if st.button("DELETE ACCOUNT", type="primary", key="um_del_btn"):
+                            if confirm_del != edit_target:
+                                st.error("Username does not match. Deletion cancelled.")
+                            elif edit_target == st.session_state.username:
+                                st.error("🔒 Cannot delete your own account while logged in.")
+                            else:
+                                _sa_session.delete(edit_u)
+                                _sa_session.commit()
+                                st.success(f"Deleted **{edit_target}**.")
+                                st.rerun()
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+            # ── Reset Password sub-section ──
+            st.markdown("<div class='sect-card'>", unsafe_allow_html=True)
+            st.markdown("<h3>🔑  Reset User Password</h3>", unsafe_allow_html=True)
+            st.caption("Force-reset any user's password. They must be notified separately.")
+
+            rp_col1, rp_col2 = st.columns(2)
+            with rp_col1:
+                rp_user = st.selectbox("Select user", usernames, key="um_rp_user")
+            with rp_col2:
+                rp_new_pwd = st.text_input("New password (min 6 chars)", type="password", key="um_rp_pwd")
+
+            if st.button("🔑  RESET PASSWORD", key="um_rp_btn", use_container_width=True):
+                if not rp_new_pwd or len(rp_new_pwd) < 6:
+                    st.error("Password must be at least 6 characters.")
+                else:
+                    rp_u = _sa_session.query(_SAUser).filter(_SAUser.username == rp_user).first()
+                    if rp_u:
+                        rp_u.password_hash = rp_new_pwd
+                        # Also update Registration table if linked
+                        rp_reg = _sa_session.query(_SAReg).filter(_SAReg.email == rp_u.email).first()
+                        if rp_reg:
+                            rp_reg.password = rp_new_pwd
+                        _sa_session.commit()
+                        st.success(f"✅ Password for **{rp_user}** has been reset.")
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        # ── TAB 3: CREATE USER ────────────────────────────
+        with tab_create:
+            st.markdown("<div class='sect-card'>", unsafe_allow_html=True)
+            st.markdown("<h3>Create New Account</h3>", unsafe_allow_html=True)
+            st.caption("This will create both a Registration record and a User account instantly.")
+
+            cu_c1, cu_c2 = st.columns(2)
+            with cu_c1:
+                cu_uname = st.text_input("Username *", placeholder="johndoe", key="cu_uname")
+                cu_email = st.text_input("Email *", placeholder="john@example.com", key="cu_email")
+            with cu_c2:
+                cu_pwd   = st.text_input("Password *", type="password", placeholder="Min 6 characters", key="cu_pwd")
+                cu_mobile = st.text_input("Mobile (optional)", placeholder="+91 98765 43210", key="cu_mobile")
+
+            cu_role  = st.selectbox("Assign Role", ["User", "Admin", "super_admin"], key="cu_role")
+            cu_active = st.toggle("Account Active", value=True, key="cu_active")
+
+            if st.button("➕  CREATE ACCOUNT", use_container_width=True, type="primary", key="cu_btn"):
+                if not cu_uname or not cu_email or not cu_pwd:
+                    st.error("Username, email and password are required.")
+                elif len(cu_pwd) < 6:
+                    st.error("Password must be at least 6 characters.")
+                else:
+                    existing = _sa_session.query(_SAUser).filter(
+                        (_SAUser.username == cu_uname.strip()) | (_SAUser.email == cu_email.strip())
+                    ).first()
+                    if existing:
+                        st.error("A user with that username or email already exists.")
                     else:
-                        session.delete(selected_u)
-                        session.commit()
-                        st.success(f"Deleted user {target_user}")
-                        st.rerun()
-                        
+                        try:
+                            new_reg = _SAReg(
+                                username=cu_uname.strip(),
+                                email=cu_email.strip(),
+                                password=cu_pwd,
+                                mobileno=cu_mobile.strip() or None,
+                                created_at=datetime.datetime.utcnow()
+                            )
+                            _sa_session.add(new_reg)
+                            _sa_session.flush()
+                            # Generate unique user_id
+                            import random as _rand
+                            _uid = f"U{_rand.randint(1000,9999)}"
+                            while _sa_session.query(_SAUser).filter(_SAUser.user_id == _uid).first():
+                                _uid = f"U{_rand.randint(1000,9999)}"
+                            new_user = _SAUser(
+                                user_id=_uid,
+                                username=cu_uname.strip(),
+                                email=cu_email.strip(),
+                                password_hash=cu_pwd,
+                                role=cu_role,
+                                is_active=cu_active,
+                                created_at=datetime.datetime.utcnow(),
+                                registration_id=str(new_reg.id)
+                            )
+                            _sa_session.add(new_user)
+                            _sa_session.commit()
+                            st.success(f"✅ Account **{cu_uname}** created with role **{cu_role}**!")
+                            st.rerun()
+                        except Exception as _ce:
+                            _sa_session.rollback()
+                            st.error(f"Failed to create account: {_ce}")
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        # ── TAB 4: AUDIT LOG ──────────────────────────────
+        with tab_audit:
+            st.markdown("<div class='sect-card'>", unsafe_allow_html=True)
+            st.markdown("<h3>System Overview</h3>", unsafe_allow_html=True)
+
+            # Role distribution chart
+            role_counts = {}
+            for u in all_users:
+                r = u.role or "User"
+                role_counts[r] = role_counts.get(r, 0) + 1
+
+            rc_df = pd.DataFrame(list(role_counts.items()), columns=["Role", "Count"])
+            try:
+                import plotly.express as _px_sa
+                fig_roles = _px_sa.pie(
+                    rc_df, names="Role", values="Count",
+                    color_discrete_map={"super_admin": "#f59e0b", "Admin": "#7c3aed", "User": "#10b981"},
+                    title="Role Distribution"
+                )
+                fig_roles.update_layout(
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    font_family="Times New Roman",
+                    margin=dict(t=40, b=0, l=0, r=0)
+                )
+                st.plotly_chart(fig_roles, use_container_width=True)
+            except ImportError:
+                st.dataframe(rc_df, use_container_width=True)
+
+            st.markdown("---")
+            st.markdown("<h3>Account Register (Full)</h3>", unsafe_allow_html=True)
+
+            full_rows = []
+            for u in all_users:
+                full_rows.append({
+                    "User ID":    u.user_id,
+                    "Username":   u.username,
+                    "Email":      u.email or "—",
+                    "Role":       u.role or "User",
+                    "Active":     "Yes" if u.is_active else "No",
+                    "Joined":     u.created_at.strftime("%Y-%m-%d %H:%M") if u.created_at else "—",
+                    "Last Login": u.last_login.strftime("%Y-%m-%d %H:%M") if u.last_login else "Never",
+                })
+
+            full_df = pd.DataFrame(full_rows)
+            st.dataframe(full_df, use_container_width=True, hide_index=True)
+
+            import io as _io_sa
+            _csv_buf = _io_sa.StringIO()
+            full_df.to_csv(_csv_buf, index=False)
+            st.download_button(
+                "📥  Download User Register (CSV)",
+                data=_csv_buf.getvalue(),
+                file_name="user_register.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
     finally:
-        session.close()
+        _sa_session.close()
 
 # ---------------- OTHER PAGES ----------------
-else:
+elif menu not in nav_items:
     st.info("This section will be implemented next.")
 
 
