@@ -1499,8 +1499,9 @@ if menu == "Dashboard":
             # Show core columns in main table
             core_cols = ['Product', 'Class', 'Pattern', 'Season']
             core_df = display_df[core_cols].copy()
+            
             # Create professional HTML table with double-sticky header (Title + Columns)
-            demand_html = '<div style="margin: 0; padding: 0; background: white; border-radius: 14px; overflow: hidden;">'
+            demand_html = '<div style="margin: 32px 0; padding: 0; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; overflow-x: auto; max-height: 520px; overflow-y: auto; position: relative;">'
             
             # 1. Sticky Title
             demand_html += '<div style="position: sticky; top: 0; background: white; z-index: 20; padding: 24px 28px 10px 28px; border-bottom: 1px solid #f1f5f9;">'
@@ -1525,21 +1526,11 @@ if menu == "Dashboard":
             demand_html += '</tbody></table>'
             demand_html += '</div>'
             
-            import streamlit.components.v1 as components
-            # Render using iframe to allow massive DOM lists without markdown truncation
-            components.html(f"""
-                <style>
-                    ::-webkit-scrollbar {{ width: 8px; height: 8px; }}
-                    ::-webkit-scrollbar-track {{ background: transparent; }}
-                    ::-webkit-scrollbar-thumb {{ background: #cbd5e1; border-radius: 4px; }}
-                    ::-webkit-scrollbar-thumb:hover {{ background: #94a3b8; }}
-                    body {{ margin: 0; font-family: sans-serif; background: transparent; }}
-                </style>
-                {demand_html}
-            """, height=550, scrolling=True)
+            st.markdown(demand_html, unsafe_allow_html=True)
             
         else:
             st.info("No demand pattern data available.")
+
     except Exception as e:
         st.warning(f"Failed to load demand pattern classification: {e}")
 
