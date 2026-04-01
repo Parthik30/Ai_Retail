@@ -1499,9 +1499,8 @@ if menu == "Dashboard":
             # Show core columns in main table
             core_cols = ['Product', 'Class', 'Pattern', 'Season']
             core_df = display_df[core_cols].copy()
-            
             # Create professional HTML table with double-sticky header (Title + Columns)
-            demand_html = '<div style="margin: 32px 0; padding: 0; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; overflow-x: auto; max-height: 520px; overflow-y: auto; position: relative;">'
+            demand_html = '<div style="margin: 0; padding: 0; background: white; border-radius: 14px; overflow: hidden;">'
             
             # 1. Sticky Title
             demand_html += '<div style="position: sticky; top: 0; background: white; z-index: 20; padding: 24px 28px 10px 28px; border-bottom: 1px solid #f1f5f9;">'
@@ -1510,7 +1509,7 @@ if menu == "Dashboard":
             
             demand_html += '<table style="width: 100%; border-collapse: collapse; font-family: \'Times New Roman\', Times, serif;">'
             
-            # 2. Sticky Table Header (adjusted top to sit below the Title)
+            # 2. Sticky Table Header
             demand_html += '<thead><tr style="background: #f8fafc;">'
             for col in core_cols:
                 demand_html += f'<th style="position: sticky; top: 60px; background: #f8fafc; z-index: 10; padding: 18px 28px; text-align: left; font-weight: 700; color: #475569; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0;">{col}</th>'
@@ -1526,15 +1525,27 @@ if menu == "Dashboard":
             demand_html += '</tbody></table>'
             demand_html += '</div>'
             
-            st.markdown(demand_html, unsafe_allow_html=True)
+            import streamlit.components.v1 as components
+            # Render using iframe to allow massive DOM lists without markdown truncation
+            components.html(f"""
+                <style>
+                    ::-webkit-scrollbar {{ width: 8px; height: 8px; }}
+                    ::-webkit-scrollbar-track {{ background: transparent; }}
+                    ::-webkit-scrollbar-thumb {{ background: #cbd5e1; border-radius: 4px; }}
+                    ::-webkit-scrollbar-thumb:hover {{ background: #94a3b8; }}
+                    body {{ margin: 0; font-family: sans-serif; background: transparent; }}
+                </style>
+                {demand_html}
+            """, height=550, scrolling=True)
             
         else:
             st.info("No demand pattern data available.")
     except Exception as e:
         st.warning(f"Failed to load demand pattern classification: {e}")
 
+
     # ---------------- APPLY DISCOUNT ----------------
-    st.markdown('<div style="margin: 20px 0; padding: 24px; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1px solid #f1f5f9;">', unsafe_allow_html=True)
+    st.markdown("---")
     if data.get("discount", 0) == 0:
         st.info("No discount recommended for this product.")
     else:
@@ -1587,13 +1598,13 @@ if menu == "Dashboard":
                     st.success(f"Applied {data['discount']}% discount to {selected_product} (session-only). New price: ₹{data['final_price']:,.2f}")
             except Exception as e:
                 st.error(f"Failed to apply discount: {e}")
-    st.markdown('</div>', unsafe_allow_html=True)
+    # Closing div removed
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Keep Add Product expander (unchanged, but in a card)
-    st.markdown('<div style="margin: 20px 0; padding: 24px; background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1px solid #f1f5f9;">', unsafe_allow_html=True)
-    st.markdown("<h4 style='margin:0 0 16px 0; color:#1a1a2e; font-size:18px;'>Quick Actions</h4>", unsafe_allow_html=True)
+    # Keep Add Product expander (unchanged)
+    st.markdown("---")
+    st.markdown("<h4 style='color:#1a1a2e; font-size:18px;'>Quick Actions</h4>", unsafe_allow_html=True)
     with st.expander("Add new product to catalog", expanded=False):
         with st.form("add_product_form"):
             pid = st.text_input("Product ID")
@@ -1690,7 +1701,7 @@ if menu == "Dashboard":
                                 st.experimental_rerun()
                         except Exception as e:
                             st.error(f"Failed to add product: {e}")
-    st.markdown('</div>', unsafe_allow_html=True)
+    # Closing div removed
 
 
 

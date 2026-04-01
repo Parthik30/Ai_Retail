@@ -273,26 +273,36 @@ def get_demand_pattern_classification(base_dir: Path = None, product_name: str =
     """
     base_dir = Path(__file__).resolve().parents[1] if base_dir is None else Path(base_dir)
 
-    # Try DB for products first, fall back to CSV
+    # Merge DB and CSV products to ensure catalog is always full
+    prods_list = []
     try:
         from ..db import SessionLocal
         from ..models import Product
         session = SessionLocal()
-        prods = session.query(Product).all()
+        db_prods = session.query(Product).all()
         session.close()
-        if prods:
-            prod_df = pd.DataFrame([{
+        if db_prods:
+            prods_list = [{
                 "product_name": p.product_name,
-                "selling_price": p.selling_price,
-                "cost_price": p.cost_price,
-                "monthly_sales": p.monthly_sales,
-                "stock": p.stock,
-                "category": p.category
-            } for p in prods])
-        else:
-            prod_df = _load_csv_if_exists(base_dir, "products.csv")
+                "selling_price": float(p.selling_price or 0),
+                "cost_price": float(p.cost_price or 0),
+                "monthly_sales": int(p.monthly_sales or 0),
+                "stock": int(p.stock or 0),
+                "category": p.category or "Other"
+            } for p in db_prods]
     except Exception:
-        prod_df = _load_csv_if_exists(base_dir, "products.csv")
+        pass
+
+    csv_df = _load_csv_if_exists(base_dir, "products.csv")
+    if csv_df is not None:
+        csv_list = csv_df.to_dict('records')
+        # Combine lists, preferring DB if same name
+        seen_names = {p['product_name'] for p in prods_list}
+        for cp in csv_list:
+            if cp['product_name'] not in seen_names:
+                prods_list.append(cp)
+    
+    prod_df = pd.DataFrame(prods_list)
 
     sales_df = _load_csv_if_exists(base_dir, "sales_history.csv")
 
