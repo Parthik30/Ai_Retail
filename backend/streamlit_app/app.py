@@ -16,11 +16,11 @@ from backend.services.dashboard_service import (
 import streamlit as st # Ensure streamlit is available for decorators
 
 # ── Caching expensive service calls ──
-@st.cache_data(ttl=300) # Cache for 5 minutes
+@st.cache_data(ttl=300, show_spinner=False) # Cache for 5 minutes, hide technical name
 def cached_get_dashboard_data(product):
     return get_dashboard_data(product)
 
-@st.cache_data(ttl=600) # Cache for 10 minutes
+@st.cache_data(ttl=600, show_spinner=False) # Cache for 10 minutes, hide technical name
 def cached_get_demand_pattern_classification():
     return get_demand_pattern_classification()
 import backend.services.inventory_service as inv_service

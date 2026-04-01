@@ -267,8 +267,10 @@ def ai_predict_classification(product_row: pd.Series, sales_series: list) -> Dic
     return {"ai_value": pred_value, "ai_pattern": pred_pattern, "ai_confidence": conf}
 
 
-def get_demand_pattern_classification(base_dir: Path = None) -> pd.DataFrame:
-    """Return a DataFrame with value_class/demand_pattern/seasonality classifications for all products and AI predictions."""
+def get_demand_pattern_classification(base_dir: Path = None, product_name: str = None) -> pd.DataFrame:
+    """Return a DataFrame with value_class/demand_pattern/seasonality classifications.
+    If product_name is provided, only processes and returns that single product for efficiency.
+    """
     base_dir = Path(__file__).resolve().parents[1] if base_dir is None else Path(base_dir)
 
     # Try DB for products first, fall back to CSV
@@ -300,7 +302,10 @@ def get_demand_pattern_classification(base_dir: Path = None) -> pd.DataFrame:
     abc_map = _classify_abc(prod_df)
 
     rows = []
-    for _, r in prod_df.iterrows():
+    # If product_name is provided, filter the prod_df loop
+    target_prods = prod_df[prod_df["product_name"] == product_name] if product_name else prod_df
+    
+    for _, r in target_prods.iterrows():
         name = r["product_name"]
         sales_series = _aggregate_sales_series(sales_df, name)
         xyz_info = _classify_xyz(sales_series)
@@ -376,7 +381,7 @@ def get_dashboard_data(product, on_date: date = None):
 
     # Demand pattern classification for selected product (ABC/XYZ/seasonality)
     try:
-        patterns = get_demand_pattern_classification(base_dir)
+        patterns = get_demand_pattern_classification(base_dir, product_name=product)
         row = patterns[patterns["product_name"] == product]
         if not row.empty:
             row = row.iloc[0]
